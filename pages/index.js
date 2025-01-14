@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
-import Navbar from './navbar' 
-import Footer from './footer'
+import Navbar from './navbar'
 
 export default function Home() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -166,7 +165,6 @@ export default function Home() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }
