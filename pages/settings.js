@@ -11,6 +11,11 @@ export default function Settings() {
   const [importStatus, setImportStatus] = useState('');
   const [searchEngine, setSearchEngine] = useState('');
   const [backgroundImage, setBackgroundImage] = useState('');
+  const [passwordLength, setPasswordLength] = useState(16);
+  const [passwordCharset, setPasswordCharset] = useState('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/');
+  const [passwordAlgorithm, setPasswordAlgorithm] = useState('blake3');
+  const [passwordSeed, setPasswordSeed] = useState('');
+  const [passwordEmail, setPasswordEmail] = useState('');
 
   useEffect(() => {
     // Load saved settings from localStorage
@@ -18,9 +23,19 @@ export default function Settings() {
     const savedSearches = localStorage.getItem('recentSearches');
     const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
+    const savedPasswordLength = parseInt(localStorage.getItem('passwordLength')) || 16;
+    const savedPasswordCharset = localStorage.getItem('passwordCharset') || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const savedPasswordAlgorithm = localStorage.getItem('passwordAlgorithm') || 'blake3';
+    const savedPasswordSeed = localStorage.getItem('passwordSeed') || '';
+    const savedPasswordEmail = localStorage.getItem('passwordEmail') || '';
     
     setTheme(savedTheme);
     setBackgroundImage(savedBackgroundImage);
+    setPasswordLength(savedPasswordLength);
+    setPasswordCharset(savedPasswordCharset);
+    setPasswordAlgorithm(savedPasswordAlgorithm);
+    setPasswordSeed(savedPasswordSeed);
+    setPasswordEmail(savedPasswordEmail);
     if (savedSearches) {
       setRecentSearches(JSON.parse(savedSearches));
     }
@@ -50,6 +65,36 @@ export default function Settings() {
     localStorage.setItem('searchEngine', newEngine);
   };
 
+  const handlePasswordLengthChange = (e) => {
+    const newLength = parseInt(e.target.value);
+    setPasswordLength(newLength);
+    localStorage.setItem('passwordLength', newLength);
+  };
+
+  const handlePasswordCharsetChange = (e) => {
+    const newCharset = e.target.value;
+    setPasswordCharset(newCharset);
+    localStorage.setItem('passwordCharset', newCharset);
+  };
+
+  const handlePasswordAlgorithmChange = (e) => {
+    const newAlgorithm = e.target.value;
+    setPasswordAlgorithm(newAlgorithm);
+    localStorage.setItem('passwordAlgorithm', newAlgorithm);
+  };
+
+  const handlePasswordSeedChange = (e) => {
+    const newSeed = e.target.value;
+    setPasswordSeed(newSeed);
+    localStorage.setItem('passwordSeed', newSeed);
+  };
+
+  const handlePasswordEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setPasswordEmail(newEmail);
+    localStorage.setItem('passwordEmail', newEmail);
+  };
+
   const clearRecentSearches = () => {
     setRecentSearches([]);
     localStorage.removeItem('recentSearches');
@@ -60,7 +105,12 @@ export default function Settings() {
       theme: theme,
       recentSearches: recentSearches,
       searchEngine: searchEngine,
-      backgroundImage: backgroundImage
+      backgroundImage: backgroundImage,
+      passwordLength: passwordLength,
+      passwordCharset: passwordCharset,
+      passwordAlgorithm: passwordAlgorithm,
+      passwordSeed: passwordSeed,
+      passwordEmail: passwordEmail
     };
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -96,6 +146,26 @@ export default function Settings() {
           if (settings.backgroundImage) {
             setBackgroundImage(settings.backgroundImage);
             localStorage.setItem('backgroundImage', settings.backgroundImage);
+          }
+          if (settings.passwordLength) {
+            setPasswordLength(settings.passwordLength);
+            localStorage.setItem('passwordLength', settings.passwordLength);
+          }
+          if (settings.passwordCharset) {
+            setPasswordCharset(settings.passwordCharset);
+            localStorage.setItem('passwordCharset', settings.passwordCharset);
+          }
+          if (settings.passwordAlgorithm) {
+            setPasswordAlgorithm(settings.passwordAlgorithm);
+            localStorage.setItem('passwordAlgorithm', settings.passwordAlgorithm);
+          }
+          if (settings.passwordSeed) {
+            setPasswordSeed(settings.passwordSeed);
+            localStorage.setItem('passwordSeed', settings.passwordSeed);
+          }
+          if (settings.passwordEmail) {
+            setPasswordEmail(settings.passwordEmail);
+            localStorage.setItem('passwordEmail', settings.passwordEmail);
           }
           setImportStatus('Settings imported successfully!');
           setTimeout(() => setImportStatus(''), 3000);
@@ -215,6 +285,72 @@ export default function Settings() {
               >
                 Clear Search History
               </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Password Generator Settings</h2>
+            <div className="mb-6">
+              <label htmlFor="passwordLength" className="block mb-2">Password Length:</label>
+              <input
+                id="passwordLength"
+                type="number"
+                value={passwordLength}
+                onChange={handlePasswordLengthChange}
+                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                placeholder="Enter password length..."
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="passwordCharset" className="block mb-2">Password Charset:</label>
+              <input
+                id="passwordCharset"
+                type="text"
+                value={passwordCharset}
+                onChange={handlePasswordCharsetChange}
+                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                placeholder="Enter password charset..."
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="passwordAlgorithm" className="block mb-2">Password Algorithm:</label>
+              <select
+                id="passwordAlgorithm"
+                className="bg-gray-100 border border-gray-300 rounded px-3 py-1"
+                value={passwordAlgorithm}
+                onChange={handlePasswordAlgorithmChange}
+              >
+                <option value="blake3">blake3</option>
+                <option value="blake2s">blake2s</option>
+                <option value="blake2b">blake2b</option>
+                <option value="sha256">sha256</option>
+                <option value="sha384">sha384</option>
+                <option value="sha512">sha512</option>
+                <option value="crc32">crc32</option>
+                <option value="crc64">crc64</option>
+              </select>
+            </div>
+            <div className="mb-6">
+              <label htmlFor="passwordSeed" className="block mb-2">Password Seed:</label>
+              <input
+                id="passwordSeed"
+                type="text"
+                value={passwordSeed}
+                onChange={handlePasswordSeedChange}
+                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                placeholder="Enter password seed..."
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="passwordEmail" className="block mb-2">Password Email:</label>
+              <input
+                id="passwordEmail"
+                type="email"
+                value={passwordEmail}
+                onChange={handlePasswordEmailChange}
+                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                placeholder="Enter email..."
+              />
             </div>
           </div>
 

@@ -52,6 +52,14 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Random generator */}
+              <a href="/utils/random_gen">
+                <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                  <h2 className="text-xl font-semibold mb-4">Random generator</h2>
+                  <p className="text-gray-600">Generate a random number or string as you need.</p>
+                </div>
+              </a>
+
             </div>
           </div>
         </div>

@@ -1,16 +1,16 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Navbar from '../navbar';
 import Footer from '../footer';
-import {blake3, blake2s, blake2b, sha256, sha384, sha512, crc32, crc64 } from 'hash-wasm';
+import { blake3, blake2s, blake2b, sha256, sha384, sha512, crc32, crc64 } from 'hash-wasm';
 
 const DEFAULT_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 const MIN_PASSWORD_LENGTH = 8;
 const ALGORITHMS = {
   'blake3': blake3,
-  'blake2s': blake2s, 
+  'blake2s': blake2s,
   'blake2b': blake2b,
   'sha256': sha256,
   'sha384': sha384,
@@ -20,13 +20,35 @@ const ALGORITHMS = {
 };
 
 export default function PasswordGenerator() {
-  const [seed, setSeed] = useState('');
   const [salt, setSalt] = useState('');
-  const [email, setEmail] = useState('');
   const [site, setSite] = useState('');
-  const [charset, setCharset] = useState(DEFAULT_CHARSET);
+
+  const generateRandomSeed = () => {
+    let seed = '';
+    for (let i = 0; i < 32; i++) {
+      seed += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+    }
+    return seed;
+  };
+  useEffect(() => {
+    const savedSeed = localStorage.getItem('passwordSeed') || generateRandomSeed();
+    const savedCharset = localStorage.getItem('passwordCharset') || DEFAULT_CHARSET;
+    const savedLength = parseInt(localStorage.getItem('passwordLength')) || 16;
+    const savedAlgorithm = localStorage.getItem('passwordAlgorithm') || 'blake3';
+    const savedEmail = localStorage.getItem('passwordEmail') || '';
+
+    setSeed(savedSeed);
+    setCharset(savedCharset);
+    setLength(savedLength);
+    setAlgorithm(savedAlgorithm);
+    setEmail(savedEmail);
+  }, []);
+
+  const [seed, setSeed] = useState('');
+  const [charset, setCharset] = useState('');
   const [length, setLength] = useState(16);
   const [algorithm, setAlgorithm] = useState('blake3');
+  const [email, setEmail] = useState('');
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [steps, setSteps] = useState([]);
 
@@ -36,30 +58,30 @@ export default function PasswordGenerator() {
 
   const generatePassword = async () => {
     setSteps([]);
-    
+
     if (length < MIN_PASSWORD_LENGTH) {
       addStep(`Error: Password length must be at least ${MIN_PASSWORD_LENGTH} characters`);
       return;
     }
-    
+
     try {
       // Step 1: Combine inputs
       const combinedInput = `${seed}:${salt}:${email}:${site}`;
       addStep('1. Combined inputs for processing');
-      
+
       // Step 2: Initial key derivation using selected algorithm
       const initialHash = await ALGORITHMS[algorithm](combinedInput);
       addStep(`2. Performed initial key derivation with ${algorithm}`);
 
       // Step 3: Additional mixing with site
-      const mixInput = initialHash + (site || 'defaultSite'); 
+      const mixInput = initialHash + (site || 'defaultSite');
       const mixedHash = await ALGORITHMS[algorithm](mixInput);
       addStep('3. Additional mixing with site-specific salt');
 
       // Step 4: Convert to password using charset and ensure at least one hyphen
       let password = '';
       const bytes = new Uint8Array(mixedHash.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-      
+
       // Generate password with extra character for hyphen insertion
       for (let i = 0; i < length + 1; i++) {
         password += charset[bytes[i] % charset.length];
@@ -68,11 +90,11 @@ export default function PasswordGenerator() {
       // Insert hyphen at random position
       const hyphenPos = bytes[length] % (password.length - 1) + 1; // Avoid first position
       password = password.slice(0, hyphenPos) + '-' + password.slice(hyphenPos);
-      
+
       addStep('4. Converted hash to password and inserted required hyphen');
 
       setGeneratedPassword(password);
-      
+
     } catch (error) {
       console.error('Error generating password:', error);
       addStep(`Error: ${error.message}`);
@@ -82,16 +104,28 @@ export default function PasswordGenerator() {
   return (
     <div className="min-h-screen flex flex-col">
       <Head>
-        <title>Password Generator</title>
+        <title>Password Generator (Psudo-Random)</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className="flex-grow bg-gray-100">
         <Navbar />
-        
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Password Generator</h1>
 
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold mb-8">Password Generator (Psudo-Random)</h1>
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+            <p className="font-bold">Note:</p>
+            <p>
+              This password generator widget uses your local configuration settings for generating passwords.
+              If you find any inconsistencies or wish to change the default settings, please update them in the
+              <a href="/settings" className="text-blue-500 underline"> settings menu</a>.
+            </p>
+
+            <p>
+              We will not save your passwords or any other data generated by this widget, we don't even have backend implementation.
+              All the data is generated in your browser and is not sent to any server. If you trust this site, you can use it as your password manager, but remember to backup your passwords since the algorithm may update by the administrator needs.
+            </p>
+          </div>
           <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
             <div className="space-y-4">
               <div>
