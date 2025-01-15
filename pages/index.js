@@ -180,15 +180,36 @@ export default function Home() {
                   </div>
                 </a>
               </div>
-
+              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                    <h3 className="text-white text-lg font-semibold mb-2">GitHub</h3>
+                    <p className="text-gray-200 text-sm">Development platform</p>
+                  </div>
+                </a>
+              </div>
 
               <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
-                <div className="relative p-4">
-                  <h3 className="text-white text-lg font-semibold mb-2">GitHub</h3>
-                  <p className="text-gray-200 text-sm">Development platform</p>
-                </div>
+                <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                    <h3 className="text-white text-lg font-semibold mb-2">Cloudflare</h3>
+                    <p className="text-gray-200 text-sm">Web infrastructure & security</p>
+                  </div>
+                </a>
               </div>
+
+              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <a href="https://vercel.com" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                    <h3 className="text-white text-lg font-semibold mb-2">Vercel</h3>
+                    <p className="text-gray-200 text-sm">Deployment & hosting platform</p>
+                  </div>
+                </a>
+              </div>
+
             </div>
           </div>
         </div>
