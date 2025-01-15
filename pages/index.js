@@ -14,7 +14,7 @@ export default function Home() {
     const savedSearches = localStorage.getItem('recentSearches');
     const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
-    
+
     if (savedSearches) {
       setRecentSearches(JSON.parse(savedSearches));
     }
@@ -66,16 +66,16 @@ export default function Home() {
 
       <main className="flex-grow flex flex-col">
         <Navbar />
-        <div 
+        <div
           className="flex-grow bg-gray-100 bg-cover bg-center bg-no-repeat"
-          style={backgroundImage ? {backgroundImage: `url('${backgroundImage}')`} : {}}
+          style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : {}}
         >
           <div className="flex flex-col items-center pt-20 px-4">
             {/* Google-style logo */}
             <h1 className="text-6xl font-bold mb-8 text-gray-800">
               Search <span className="animate-typing overflow-hidden whitespace-nowrap border-r-4 border-gray-800 pr-1">with INDEX</span>
             </h1>
-            
+
             {/* Search bar */}
             <div className="w-full max-w-2xl mb-16">
               <form onSubmit={handleSubmit} className="relative">
@@ -100,8 +100,8 @@ export default function Home() {
                     {recentSearches.length > 0 ? (
                       <ul className="py-2">
                         {recentSearches.map((search, index) => (
-                          <li 
-                            key={index} 
+                          <li
+                            key={index}
                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                             onClick={() => handleRecentSearchClick(search)}
                           >
@@ -125,39 +125,68 @@ export default function Home() {
             {/* Bookmarks grid */}
             <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
               {/* Example bookmark cards */}
+
               <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://source.unsplash.com/random/800x600?github')"}}></div>
+                <a href="https://wustl.instructure.com/" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                    <h3 className="text-white text-lg font-semibold mb-2">
+                      Canvas (WUSTL)
+                    </h3>
+                    <p className="text-gray-200 text-sm">Daily assignments</p>
+                  </div>
+                </a>
+              </div>
+
+              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <a href="https://webstac.wustl.edu//" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                    <h3 className="text-white text-lg font-semibold mb-2">
+                      WebStac (WUSTL)
+                    </h3>
+                    <p className="text-gray-200 text-sm">Task manager</p>
+                  </div>
+                </a>
+              </div>
+
+              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <a href="https://leetcode.com/" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                  <h3 className="text-white text-lg font-semibold mb-2">LeetCode</h3>
+                    <p className="text-gray-200 text-sm">Gym for coding</p>
+                  </div>
+                </a>
+              </div>
+
+              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <a href="https://gmail.com" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                    <h3 className="text-white text-lg font-semibold mb-2">Gmail</h3>
+                    <p className="text-gray-200 text-sm">Email service (Personal)</p>
+                  </div>
+                </a>
+              </div>
+
+              
+              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <a href="https://outlook.com" target="_blank" rel="noopener noreferrer">
+                  <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="relative p-4">
+                    <h3 className="text-white text-lg font-semibold mb-2">Outlook</h3>
+                    <p className="text-gray-200 text-sm">Email service (Work)</p>
+                  </div>
+                </a>
+              </div>
+
+
+              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
                 <div className="relative p-4">
                   <h3 className="text-white text-lg font-semibold mb-2">GitHub</h3>
                   <p className="text-gray-200 text-sm">Development platform</p>
-                </div>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://source.unsplash.com/random/800x600?code')"}}></div>
-                <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
-                <div className="relative p-4">
-                  <h3 className="text-white text-lg font-semibold mb-2">VS Code</h3>
-                  <p className="text-gray-200 text-sm">Code editor</p>
-                </div>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://source.unsplash.com/random/800x600?chat')"}}></div>
-                <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
-                <div className="relative p-4">
-                  <h3 className="text-white text-lg font-semibold mb-2">Discord</h3>
-                  <p className="text-gray-200 text-sm">Communication platform</p>
-                </div>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://source.unsplash.com/random/800x600?email')"}}></div>
-                <div className="absolute inset-0 bg-black opacity-60 group-hover:opacity-70 transition-opacity"></div>
-                <div className="relative p-4">
-                  <h3 className="text-white text-lg font-semibold mb-2">Gmail</h3>
-                  <p className="text-gray-200 text-sm">Email service</p>
                 </div>
               </div>
             </div>
