@@ -11,6 +11,9 @@ export default function QRConvert() {
   const [text, setText] = useState('');
   const [scannedText, setScannedText] = useState('');
   const [imageFile, setImageFile] = useState(null);
+  const [error, setError] = useState('');
+
+  const MAX_QR_LENGTH = 2953; // Maximum characters for QR code version 40
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -84,6 +87,26 @@ export default function QRConvert() {
     img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
   };
 
+  const handleCopyScannedText = async () => {
+    try {
+      await navigator.clipboard.writeText(scannedText);
+      alert('Text copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      alert('Failed to copy text to clipboard');
+    }
+  };
+
+  const handleTextChange = (e) => {
+    const newText = e.target.value;
+    if (newText.length > MAX_QR_LENGTH) {
+      setError(`Text is too long. Maximum length is ${MAX_QR_LENGTH} characters.`);
+    } else {
+      setError('');
+    }
+    setText(newText);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Head>
@@ -100,17 +123,16 @@ export default function QRConvert() {
             <h2 className="text-xl font-semibold mb-4">Generate QR Code</h2>
             <div className="space-y-4">
               <textarea
-                className="w-full p-2 border rounded-md"
+                className={`w-full p-2 border rounded-md ${error ? 'border-red-500' : ''}`}
                 rows="4"
                 placeholder="Enter text to generate QR code"
                 value={text}
-                onChange={(e) => {
-                    console.log("text", e.target.value)
-                    setText(e.target.value)
-                }}
+                onChange={handleTextChange}
               />
-              {console.log(text)}
-              {text && (
+              {error && (
+                <div className="text-red-500 text-sm">{error}</div>
+              )}
+              {text && !error && (
                 <>
                   <div className="flex justify-center p-4 bg-gray-100 rounded-md">
                     <QRCodeSVG value={text} size={200} id="qr-code"/>
@@ -153,9 +175,15 @@ export default function QRConvert() {
               {scannedText && (
                 <div className="mt-4">
                   <h3 className="font-medium mb-2">Scanned Content:</h3>
-                  <div className="p-4 bg-gray-100 rounded-md break-words">
+                  <div className="p-4 bg-gray-100 rounded-md break-words overflow-y-auto max-h-48">
                     {scannedText}
                   </div>
+                  <button
+                    onClick={handleCopyScannedText}
+                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                  >
+                    Copy Text
+                  </button>
                 </div>
               )}
             </div>

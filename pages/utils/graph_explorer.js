@@ -15,8 +15,16 @@ export default function Graph() {
   const [weightIndex, setWeightIndex] = useState(2);
   const svgRef = useRef(null);
   const containerRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
+    // Check if the screen is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    
     // Load history from localStorage on mount
     const savedHistory = localStorage.getItem('graphHistory');
     if (savedHistory) {
@@ -143,6 +151,10 @@ export default function Graph() {
         d.fy = null;
       }
     }
+
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+
   }, []);
 
   const validateInput = (input, type) => {
@@ -473,113 +485,225 @@ export default function Graph() {
     setHistory(updatedHistory);
     localStorage.setItem('graphHistory', JSON.stringify(updatedHistory));
   };
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className={`${isMobile ? '' : 'h-screen'} flex flex-col overflow-hidden`}>
       <Navbar />
       
-      <main className="flex-grow flex overflow-hidden">
-        <div className="w-1/4 flex flex-col bg-gray-100 border-r">
-          <div className="p-4">
-            <select 
-              value={graphType}
-              onChange={(e) => {
-                setGraphType(e.target.value);
-                setParseStatus('');
-              }}
-              className="w-full mb-4 p-2 border rounded"
-            >
-              <option value="adjmap">Adjacency Map</option>
-              <option value="edgelist">Edge List</option>
-              <option value="tree">Tree</option>
-              <option value="binarytree">Binary Tree</option>
-            </select>
-
-            <div className="mb-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={startAtOne}
-                  onChange={(e) => setStartAtOne(e.target.checked)}
-                  className="mr-2"
-                />
-                Start node indices at 1
-              </label>
-            </div>
-
-            {graphType === 'edgelist' && (
-              <div className="mb-4">
-                <label className="block text-sm mb-1">Weight Entry Index:</label>
-                <select
-                  value={weightIndex}
-                  onChange={(e) => setWeightIndex(parseInt(e.target.value))}
-                  className="w-full p-2 border rounded"
+      <main className={`flex-grow ${isMobile ? 'flex flex-col' : 'flex'} overflow-hidden`}>
+        {!isMobile ? (
+          // Desktop layout
+          <>
+          <div className="w-3/4 p-4">
+            <div ref={containerRef} className="w-full h-full border rounded"></div>
+          </div>
+            <div className="w-1/4 flex flex-col bg-gray-100 border-r">
+              <div className="p-4">
+                <select 
+                  value={graphType}
+                  onChange={(e) => {
+                    setGraphType(e.target.value);
+                    setParseStatus('');
+                  }}
+                  className="w-full mb-4 p-2 border rounded"
                 >
-                  <option value={2}>2 (Second Entry)</option>
-                  <option value={3}>3 (Third Entry)</option>
+                  <option value="adjmap">Adjacency Map</option>
+                  <option value="edgelist">Edge List</option>
+                  <option value="tree">Tree</option>
+                  <option value="binarytree">Binary Tree</option>
                 </select>
-              </div>
-            )}
-            
-            <textarea
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                setParseStatus('');
-              }}
-              placeholder="Enter graph data in JSON format..."
-              className="w-full h-40 p-2 border rounded mb-2"
-            />
 
-            {parseStatus && (
-              <div className={`mb-2 p-2 rounded text-sm ${
-                parseStatus.startsWith('Error') 
-                  ? 'bg-red-100 text-red-700' 
-                  : 'bg-green-100 text-green-700'
-              }`}>
-                {parseStatus}
-              </div>
-            )}
-            
-            <button
-              onClick={processData}
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4"
-            >
-              Visualize
-            </button>
-          </div>
-
-          <h3 className="font-bold mb-2 ms-4">History</h3>
-          <div className="border-t flex-grow overflow-y-auto">
-            <div className="p-4">
-              {history.map((entry, index) => (
-                <div key={entry.timestamp} className="flex items-center justify-between mb-2 p-2 bg-white rounded">
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{entry.type}</div>
-                    <div className="text-xs text-gray-500 truncate max-w-[200px] overflow-hidden text-ellipsis">{entry.data}</div>
-                  </div>
-                  <div className="flex justify-end gap-2 ml-4">
-                    <button
-                      onClick={() => loadHistoryEntry(entry)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      Load
-                    </button>
-                    <button
-                      onClick={() => deleteHistoryEntry(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                <div className="mb-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={startAtOne}
+                      onChange={(e) => setStartAtOne(e.target.checked)}
+                      className="mr-2"
+                    />
+                    Start node indices at 1
+                  </label>
                 </div>
-              ))}
+
+                {graphType === 'edgelist' && (
+                  <div className="mb-4">
+                    <label className="block text-sm mb-1">Weight Entry Index:</label>
+                    <select
+                      value={weightIndex}
+                      onChange={(e) => setWeightIndex(parseInt(e.target.value))}
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value={2}>2 (Second Entry)</option>
+                      <option value={3}>3 (Third Entry)</option>
+                    </select>
+                  </div>
+                )}
+                
+                <textarea
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    setParseStatus('');
+                  }}
+                  placeholder="Enter graph data in JSON format..."
+                  className="w-full h-40 p-2 border rounded mb-2"
+                />
+
+                {parseStatus && (
+                  <div className={`mb-2 p-2 rounded text-sm ${
+                    parseStatus.startsWith('Error') 
+                      ? 'bg-red-100 text-red-700' 
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    {parseStatus}
+                  </div>
+                )}
+                
+                <button
+                  onClick={processData}
+                  className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4"
+                >
+                  Visualize
+                </button>
+              </div>
+
+              <h3 className="font-bold mb-2 ms-4">History</h3>
+              <div className="border-t flex-grow overflow-y-auto">
+                <div className="p-4">
+                  {history.map((entry, index) => (
+                    <div key={entry.timestamp} className="flex items-center justify-between mb-2 p-2 bg-white rounded">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{entry.type}</div>
+                        <div className="text-xs text-gray-500 truncate max-w-[200px] overflow-hidden text-ellipsis">{entry.data}</div>
+                      </div>
+                      <div className="flex justify-end gap-2 ml-4">
+                        <button
+                          onClick={() => loadHistoryEntry(entry)}
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          Load
+                        </button>
+                        <button
+                          onClick={() => deleteHistoryEntry(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        
-        <div className="w-3/4 p-4">
-          <div ref={containerRef} className="w-full h-full border rounded"></div>
-        </div>
+            
+          </>
+        ) : (
+          // Mobile layout
+          <>
+            <div className="w-full p-4">
+              <div ref={containerRef} className="w-full h-[calc(100vh-128px)] border rounded"></div>
+            </div>
+
+            <div className="w-full flex flex-col bg-gray-100">
+              <div className="p-4">
+                <select 
+                  value={graphType}
+                  onChange={(e) => {
+                    setGraphType(e.target.value);
+                    setParseStatus('');
+                  }}
+                  className="w-full mb-4 p-2 border rounded"
+                >
+                  <option value="adjmap">Adjacency Map</option>
+                  <option value="edgelist">Edge List</option>
+                  <option value="tree">Tree</option>
+                  <option value="binarytree">Binary Tree</option>
+                </select>
+
+                <div className="mb-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={startAtOne}
+                      onChange={(e) => setStartAtOne(e.target.checked)}
+                      className="mr-2"
+                    />
+                    Start node indices at 1
+                  </label>
+                </div>
+
+                {graphType === 'edgelist' && (
+                  <div className="mb-4">
+                    <label className="block text-sm mb-1">Weight Entry Index:</label>
+                    <select
+                      value={weightIndex}
+                      onChange={(e) => setWeightIndex(parseInt(e.target.value))}
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value={2}>2 (Second Entry)</option>
+                      <option value={3}>3 (Third Entry)</option>
+                    </select>
+                  </div>
+                )}
+                
+                <textarea
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    setParseStatus('');
+                  }}
+                  placeholder="Enter graph data in JSON format..."
+                  className="w-full h-40 p-2 border rounded mb-2"
+                />
+
+                {parseStatus && (
+                  <div className={`mb-2 p-2 rounded text-sm ${
+                    parseStatus.startsWith('Error') 
+                      ? 'bg-red-100 text-red-700' 
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    {parseStatus}
+                  </div>
+                )}
+                
+                <button
+                  onClick={processData}
+                  className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4"
+                >
+                  Visualize
+                </button>
+              </div>
+
+              <h3 className="font-bold mb-2 ms-4">History</h3>
+              <div className="border-t overflow-y-auto">
+                <div className="p-4">
+                  {history.map((entry, index) => (
+                    <div key={entry.timestamp} className="flex items-center justify-between mb-2 p-2 bg-white rounded">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{entry.type}</div>
+                        <div className="text-xs text-gray-500 truncate max-w-[200px] overflow-hidden text-ellipsis">{entry.data}</div>
+                      </div>
+                      <div className="flex justify-end gap-2 ml-4">
+                        <button
+                          onClick={() => loadHistoryEntry(entry)}
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          Load
+                        </button>
+                        <button
+                          onClick={() => deleteHistoryEntry(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       <Footer />
