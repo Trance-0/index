@@ -60,6 +60,14 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Random array generator */}
+              <a href="/utils/random_arr_gen" className="h-full">
+                <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Random array generator</h2>
+                  <p className="text-gray-600">Generate a random array, fun for testing.</p>
+                </div>
+              </a>
+
               {/* QR code converter */}
               <a href="/utils/qr_convert" className="h-full">
                 <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
