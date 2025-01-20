@@ -76,6 +76,14 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Division raster */}
+              <a href="/utils/division_raster" className="h-full">
+                <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Division raster</h2>
+                  <p className="text-gray-600">Impressive paper.js project.</p>
+                </div>
+              </a>
+
             </div>
           </div>
         </div>
