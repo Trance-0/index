@@ -1,3 +1,59 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base{
+    body {
+        @apply dark:bg-gray-800 bg-white
+    }
+    .bg-secondary {
+        @apply dark:bg-gray-700 dark:bg-opacity-70 bg-gray-200 bg-opacity-70
+    }
+    .text-secondary {
+        @apply dark:text-gray-400 text-gray-600
+    }
+    /*button colors*/
+    .button-info {
+        @apply dark:bg-blue-600 dark:bg-opacity-70 bg-blue-600 bg-opacity-70
+    }
+    .button-info:hover {
+        @apply dark:bg-blue-700 dark:bg-opacity-70 bg-blue-300 bg-opacity-70
+    }
+    .button-warning {
+        @apply dark:bg-red-600 dark:bg-opacity-70 bg-red-600 bg-opacity-70
+    }
+    .button-warning:hover {
+        @apply dark:bg-red-700 dark:bg-opacity-70 bg-red-300 bg-opacity-70
+    }
+    .button-success {
+        @apply dark:bg-green-600 dark:bg-opacity-70 bg-green-600 bg-opacity-70
+    }
+    .button-success:hover {
+        @apply dark:bg-green-700 dark:bg-opacity-70 bg-green-300 bg-opacity-70
+    }
+    /*elements background colors*/
+    .shadow-md{
+        @apply dark:bg-gray-800 dark:bg-opacity-90 bg-white bg-opacity-90
+    }
+    .py-1 {
+        @apply dark:bg-gray-800 dark:bg-opacity-90 bg-white bg-opacity-90
+    }
+    /*main background colors*/
+    main {
+        @apply dark:bg-gray-600 bg-gray-100
+    }
+    /*title colors*/
+    .swc-title {
+        @apply dark:text-gray-700 text-gray-500 
+    }
+    /*input background colors*/
+    input {
+        @apply dark:bg-gray-900 bg-gray-100
+    }
+    textarea {
+        @apply dark:bg-gray-900 bg-gray-100
+    }
+    select {
+        @apply dark:bg-gray-900 bg-gray-100
+    }
+}

@@ -108,8 +108,8 @@ export default function PasswordGenerator() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex-grow bg-gray-100">
-        <Navbar />
+      <Navbar />
+      <main className="flex-grow">
 
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-8">Password Generator (Psudo-Random)</h1>
@@ -126,7 +126,7 @@ export default function PasswordGenerator() {
               All the data is generated in your browser and is not sent to any server. If you trust this site, you can use it as your password manager, but remember to backup your passwords since the algorithm may update by the administrator needs.
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
+          <div className="bg-secondary rounded-lg shadow-md p-6 max-w-2xl mx-auto">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Algorithm</label>
@@ -210,7 +210,7 @@ export default function PasswordGenerator() {
 
               <button
                 onClick={generatePassword}
-                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="w-full button-info text-white px-4 py-2 rounded hover:bg-blue-600"
               >
                 Generate Password
               </button>
@@ -218,7 +218,7 @@ export default function PasswordGenerator() {
               {generatedPassword && (
                 <div className="mt-4 p-4 bg-gray-50 rounded">
                   <h3 className="font-bold mb-2">Generated Password:</h3>
-                  <div className="font-mono bg-white p-2 border rounded select-all">
+                  <div className="font-mono bg-secondary p-2 border rounded select-all">
                     {generatedPassword}
                   </div>
                 </div>
@@ -229,7 +229,7 @@ export default function PasswordGenerator() {
                   <h3 className="font-bold mb-2">Generation Steps:</h3>
                   <ul className="list-disc pl-5 space-y-1">
                     {steps.map((step, index) => (
-                      <li key={index} className="text-sm text-gray-600">{step}</li>
+                      <li key={index} className="text-sm text-secondary">{step}</li>
                     ))}
                   </ul>
                 </div>

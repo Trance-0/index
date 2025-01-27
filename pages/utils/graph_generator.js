@@ -260,15 +260,15 @@ export default function GraphGenerator() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-gray-100">
+      <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8 text-gray-800">Graph Generator</h1>
+          <h1 className="text-3xl font-bold mb-8">Graph Generator</h1>
           
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-secondary rounded-lg shadow-md p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {(outputType === 'tree' || outputType === 'binarytree') ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Tree Height
                   </label>
                   <input
@@ -282,7 +282,7 @@ export default function GraphGenerator() {
                 </div>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Number of Nodes
                   </label>
                   <input
@@ -297,7 +297,7 @@ export default function GraphGenerator() {
               )}
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-2">
                   Output Type
                 </label>
                 <select
@@ -314,7 +314,7 @@ export default function GraphGenerator() {
               
               {(outputType !== 'tree' && outputType !== 'binarytree') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Graph Type
                   </label>
                   <select

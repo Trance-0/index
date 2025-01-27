@@ -115,77 +115,78 @@ export default function QRConvert() {
       </Head>
 
       <Navbar />
-
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Generate QR Code */}
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Generate QR Code</h2>
-            <div className="space-y-4">
-              <textarea
-                className={`w-full p-2 border rounded-md ${error ? 'border-red-500' : ''}`}
-                rows="4"
-                placeholder="Enter text to generate QR code"
-                value={text}
-                onChange={handleTextChange}
-              />
-              {error && (
-                <div className="text-red-500 text-sm">{error}</div>
-              )}
-              {text && !error && (
-                <>
-                  <div className="flex justify-center p-4 bg-gray-100 rounded-md">
-                    <QRCodeSVG value={text} size={200} id="qr-code"/>
-                  </div>
-                  <div className="flex justify-center space-x-4">
-                    <button
-                      onClick={handleSaveImage}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                      Save Image
-                    </button>
-                    <button
-                      onClick={handleCopyImage}
-                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                    >
-                      Copy Image
-                    </button>
-                  </div>
-                </>
-              )}
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Generate QR Code */}
+            <div className="bg-secondary p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">Generate QR Code</h2>
+              <div className="space-y-4">
+                <textarea
+                  className={`w-full p-2 border rounded-md ${error ? 'border-red-500' : ''}`}
+                  rows="4"
+                  placeholder="Enter text to generate QR code"
+                  value={text}
+                  onChange={handleTextChange}
+                />
+                {error && (
+                  <div className="text-red-500 text-sm">{error}</div>
+                )}
+                {text && !error && (
+                  <>
+                    <div className="flex justify-center p-4 bg-secondary rounded-md">
+                      <QRCodeSVG value={text} size={200} id="qr-code" />
+                    </div>
+                    <div className="flex justify-center space-x-4">
+                      <button
+                        onClick={handleSaveImage}
+                        className="button-info text-white px-4 py-2 rounded hover:bg-blue-600"
+                      >
+                        Save Image
+                      </button>
+                      <button
+                        onClick={handleCopyImage}
+                        className="button-success text-white px-4 py-2 rounded hover:bg-green-600"
+                      >
+                        Copy Image
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Upload QR Code Image */}
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Upload QR Code Image</h2>
-            <div className="space-y-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="block w-full text-sm text-gray-500
+            {/* Upload QR Code Image */}
+            <div className="bg-secondary p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">Upload QR Code Image</h2>
+              <div className="space-y-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="block w-full text-sm text-secondary
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-md file:border-0
                   file:text-sm file:font-semibold
                   file:bg-blue-500 file:text-white
                   hover:file:bg-blue-600"
-              />
+                />
 
-              {scannedText && (
-                <div className="mt-4">
-                  <h3 className="font-medium mb-2">Scanned Content:</h3>
-                  <div className="p-4 bg-gray-100 rounded-md break-words overflow-y-auto max-h-48">
-                    {scannedText}
+                {scannedText && (
+                  <div className="mt-4">
+                    <h3 className="font-medium mb-2">Scanned Content:</h3>
+                    <div className="p-4 bg-secondary rounded-md break-words overflow-y-auto max-h-48">
+                      {scannedText}
+                    </div>
+                    <button
+                      onClick={handleCopyScannedText}
+                      className="mt-2 button-success text-white px-4 py-2 rounded hover:bg-green-600"
+                    >
+                      Copy Text
+                    </button>
                   </div>
-                  <button
-                    onClick={handleCopyScannedText}
-                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                  >
-                    Copy Text
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

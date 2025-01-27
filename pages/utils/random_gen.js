@@ -29,11 +29,11 @@ export default function RandomStringGenerator() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex-grow bg-gray-100">
-        <Navbar />
+      <Navbar />
+      <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-8">Random String Generator</h1>
-          <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
+          <div className="bg-secondary rounded-lg shadow-md p-6 max-w-2xl mx-auto">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Character Set</label>
@@ -59,13 +59,13 @@ export default function RandomStringGenerator() {
 
               <button
                 onClick={generateRandomString}
-                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
+                className="w-full button-info text-white p-2 rounded hover:bg-blue-600 transition-colors"
               >
                 Generate Random String
               </button>
 
               {generatedString && (
-                <div className="mt-4 p-4 bg-gray-100 border rounded">
+                <div className="mt-4 p-4 bg-secondary border rounded">
                   <p className="text-lg font-mono break-all">{generatedString}</p>
                 </div>
               )}

@@ -495,9 +495,9 @@ export default function Graph() {
           // Desktop layout
           <>
           <div className="w-3/4 p-4">
-            <div ref={containerRef} className="w-full h-full border rounded"></div>
+            <div ref={containerRef} className="w-full h-full  rounded-lg"></div>
           </div>
-            <div className="w-1/4 flex flex-col bg-gray-100 border-r">
+            <div className="w-1/4 flex flex-col bg-secondary border-r">
               <div className="p-4">
                 <select 
                   value={graphType}
@@ -561,7 +561,7 @@ export default function Graph() {
                 
                 <button
                   onClick={processData}
-                  className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4"
+                  className="w-full button-info text-white px-4 py-2 rounded mb-4"
                 >
                   Visualize
                 </button>
@@ -571,10 +571,10 @@ export default function Graph() {
               <div className="border-t flex-grow overflow-y-auto">
                 <div className="p-4">
                   {history.map((entry, index) => (
-                    <div key={entry.timestamp} className="flex items-center justify-between mb-2 p-2 bg-white rounded">
+                    <div key={entry.timestamp} className="flex items-center justify-between mb-2 p-2 bg-secondary rounded">
                       <div className="flex-1">
                         <div className="text-sm font-medium">{entry.type}</div>
-                        <div className="text-xs text-gray-500 truncate max-w-[200px] overflow-hidden text-ellipsis">{entry.data}</div>
+                        <div className="text-xs text-secondary truncate max-w-[200px] overflow-hidden text-ellipsis">{entry.data}</div>
                       </div>
                       <div className="flex justify-end gap-2 ml-4">
                         <button
@@ -604,7 +604,7 @@ export default function Graph() {
               <div ref={containerRef} className="w-full h-[calc(100vh-128px)] border rounded"></div>
             </div>
 
-            <div className="w-full flex flex-col bg-gray-100">
+            <div className="w-full flex flex-col">
               <div className="p-4">
                 <select 
                   value={graphType}
@@ -668,7 +668,7 @@ export default function Graph() {
                 
                 <button
                   onClick={processData}
-                  className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4"
+                  className="w-full button-info text-secondary px-4 py-2 rounded mb-4"
                 >
                   Visualize
                 </button>
@@ -678,10 +678,10 @@ export default function Graph() {
               <div className="border-t overflow-y-auto">
                 <div className="p-4">
                   {history.map((entry, index) => (
-                    <div key={entry.timestamp} className="flex items-center justify-between mb-2 p-2 bg-white rounded">
+                    <div key={entry.timestamp} className="flex items-center justify-between mb-2 p-2 bg-secondary rounded">
                       <div className="flex-1">
                         <div className="text-sm font-medium">{entry.type}</div>
-                        <div className="text-xs text-gray-500 truncate max-w-[200px] overflow-hidden text-ellipsis">{entry.data}</div>
+                        <div className="text-xs text-secondary truncate max-w-[200px] overflow-hidden text-ellipsis">{entry.data}</div>
                       </div>
                       <div className="flex justify-end gap-2 ml-4">
                         <button

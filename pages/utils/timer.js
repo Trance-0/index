@@ -85,7 +85,7 @@ export default function Timer() {
       
       <main className={`flex-grow ${isFullWindow ? 'bg-black' : 'bg-gray-100'}`}>
         <div className="container mx-auto px-4 py-8">
-          {!isFullWindow && <h1 className="text-3xl font-bold mb-8 text-gray-800">Timer</h1>}
+          {!isFullWindow && <h1 className="text-3xl font-bold mb-8">Timer</h1>}
           
           <div className={`${isFullWindow ? 'h-screen flex flex-col items-center justify-center' : 'bg-white rounded-lg shadow-md p-6 max-w-md mx-auto'}`}>
             <div className={`text-center ${isFullWindow ? 'text-9xl text-white' : 'text-4xl'} font-mono ${isFullWindow ? 'mb-16' : 'mb-8'}`}>
@@ -95,7 +95,7 @@ export default function Timer() {
             {!hasStarted ? (
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Hours</label>
+                  <label className="block text-sm font-medium text-secondary mb-1">Hours</label>
                   <input
                     type="number"
                     min="0"
@@ -106,7 +106,7 @@ export default function Timer() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Minutes</label>
+                  <label className="block text-sm font-medium text-secondary mb-1">Minutes</label>
                   <input
                     type="number"
                     min="0"
@@ -117,7 +117,7 @@ export default function Timer() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Seconds</label>
+                  <label className="block text-sm font-medium text-secondary mb-1">Seconds</label>
                   <input
                     type="number"
                     min="0"
@@ -134,7 +134,7 @@ export default function Timer() {
               {!hasStarted ? (
                 <button
                   onClick={startTimer}
-                  className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                  className="button-info text-white px-6 py-2 rounded"
                 >
                   Start
                 </button>

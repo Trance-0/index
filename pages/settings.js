@@ -1,13 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import Navbar from './navbar' 
 import Footer from './footer'
 
 export default function Settings() {
-  const [theme, setTheme] = useState('system');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { theme: currentTheme, setTheme } = useTheme();
   const [recentSearches, setRecentSearches] = useState([]);
-  const [searchInput, setSearchInput] = useState('');
   const [importStatus, setImportStatus] = useState('');
   const [searchEngine, setSearchEngine] = useState('');
   const [backgroundImage, setBackgroundImage] = useState('');
@@ -19,7 +18,6 @@ export default function Settings() {
 
   useEffect(() => {
     // Load saved settings from localStorage
-    const savedTheme = localStorage.getItem('theme') || 'system';
     const savedSearches = localStorage.getItem('recentSearches');
     const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
@@ -29,7 +27,6 @@ export default function Settings() {
     const savedPasswordSeed = localStorage.getItem('passwordSeed') || '';
     const savedPasswordEmail = localStorage.getItem('passwordEmail') || '';
     
-    setTheme(savedTheme);
     setBackgroundImage(savedBackgroundImage);
     setPasswordLength(savedPasswordLength);
     setPasswordCharset(savedPasswordCharset);
@@ -50,7 +47,6 @@ export default function Settings() {
   const handleThemeChange = (e) => {
     const newTheme = e.target.value;
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
   };
 
   const handleBackgroundImageChange = (e) => {
@@ -102,7 +98,7 @@ export default function Settings() {
 
   const exportSettings = () => {
     const settings = {
-      theme: theme,
+      theme: currentTheme,
       recentSearches: recentSearches,
       searchEngine: searchEngine,
       backgroundImage: backgroundImage,
@@ -133,7 +129,6 @@ export default function Settings() {
           const settings = JSON.parse(e.target.result);
           if (settings.theme) {
             setTheme(settings.theme);
-            localStorage.setItem('theme', settings.theme);
           }
           if (settings.recentSearches) {
             setRecentSearches(settings.recentSearches);
@@ -187,9 +182,9 @@ export default function Settings() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-gray-100">
+      <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8 text-gray-800">Settings</h1>
+          <h1 className="text-3xl font-bold mb-8">Settings</h1>
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -206,14 +201,14 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Theme Settings</h2>
             <div className="flex items-center">
               <label htmlFor="theme" className="mr-4">Theme:</label>
               <select
                 id="theme"
-                className="bg-gray-100 border border-gray-300 rounded px-3 py-1"
-                value={theme}
+                className="border rounded px-3 py-1"
+                value={currentTheme}
                 onChange={handleThemeChange}
               >
                 <option value="light">Light</option>
@@ -223,7 +218,7 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Background Settings</h2>
             <div className="mb-6">
               <label htmlFor="backgroundImage" className="block mb-2">Background Image URL:</label>
@@ -232,10 +227,10 @@ export default function Settings() {
                 type="text"
                 value={backgroundImage}
                 onChange={handleBackgroundImageChange}
-                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
                 placeholder="Enter image URL..."
               />
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm mt-2">
                 Enter a URL for the background image of the index page, notice that the image must be accessible by the public. For example, you can use a URL from Unsplash or another image hosting service, personally I recommend using self hosted wordpress server. Images from X, or other social media platforms are usually not accessible by the public.
               </p>
               {backgroundImage && (
@@ -252,7 +247,7 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Search Settings</h2>
             <div className="mb-6">
               <label htmlFor="searchEngine" className="block mb-2">Search Engine URL:</label>
@@ -261,10 +256,10 @@ export default function Settings() {
                 type="text"
                 value={searchEngine}
                 onChange={handleSearchEngineChange}
-                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
                 placeholder="Enter search engine URL with {searchTerms} placeholder..."
               />
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm mt-2">
                 Use {'{searchTerms}'} as a placeholder for the search query
               </p>
             </div>
@@ -277,18 +272,18 @@ export default function Settings() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-500 mb-4">No recent searches</p>
+                <p className="mb-4">No recent searches</p>
               )}
               <button
                 onClick={clearRecentSearches}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                className="button-warning px-4 py-2 rounded transition-colors"
               >
                 Clear Search History
               </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Password Generator Settings</h2>
             <div className="mb-6">
               <label htmlFor="passwordLength" className="block mb-2">Password Length:</label>
@@ -297,7 +292,7 @@ export default function Settings() {
                 type="number"
                 value={passwordLength}
                 onChange={handlePasswordLengthChange}
-                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
                 placeholder="Enter password length..."
               />
             </div>
@@ -308,7 +303,7 @@ export default function Settings() {
                 type="text"
                 value={passwordCharset}
                 onChange={handlePasswordCharsetChange}
-                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
                 placeholder="Enter password charset..."
               />
             </div>
@@ -316,7 +311,7 @@ export default function Settings() {
               <label htmlFor="passwordAlgorithm" className="block mb-2">Password Algorithm:</label>
               <select
                 id="passwordAlgorithm"
-                className="bg-gray-100 border border-gray-300 rounded px-3 py-1"
+                className="border rounded px-3 py-1"
                 value={passwordAlgorithm}
                 onChange={handlePasswordAlgorithmChange}
               >
@@ -337,7 +332,7 @@ export default function Settings() {
                 type="text"
                 value={passwordSeed}
                 onChange={handlePasswordSeedChange}
-                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
                 placeholder="Enter password seed..."
               />
             </div>
@@ -348,19 +343,19 @@ export default function Settings() {
                 type="email"
                 value={passwordEmail}
                 onChange={handlePasswordEmailChange}
-                className="w-full px-5 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm"
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
                 placeholder="Enter email..."
               />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Import/Export Settings</h2>
             <div className="flex flex-col gap-4">
               <div>
                 <button
                   onClick={exportSettings}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                  className="button-success px-4 py-2 rounded transition-colors"
                 >
                   Export Settings
                 </button>
@@ -373,16 +368,10 @@ export default function Settings() {
                     id="import"
                     accept=".json"
                     onChange={importSettings}
-                    className="border border-gray-300 rounded p-2"
+                    className="border rounded p-2"
                   />
                   {importStatus && (
-                    <div className={`text-sm ${
-                      importStatus.includes('Error') 
-                        ? 'text-red-500' 
-                        : importStatus === 'Importing...' 
-                          ? 'text-blue-500' 
-                          : 'text-green-500'
-                    }`}>
+                    <div className="text-sm">
                       {importStatus}
                     </div>
                   )}
@@ -391,10 +380,10 @@ export default function Settings() {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">About This Project</h2>
             <div className="space-y-4">
-              <p className="text-gray-700">
+              <p>
                 This is a personal dashboard built with Next.js and Tailwind CSS. It provides a customizable homepage with all the variables stored by the user. Our goal is to return the rights of data to the user.
               </p>
               <div className="mt-4">
@@ -402,7 +391,7 @@ export default function Settings() {
                   href="https://github.com/Trance-0/index/issues/new"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition-colors"
+                  className="button-info inline-flex items-center px-4 py-2 rounded transition-colors"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
