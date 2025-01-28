@@ -15,48 +15,7 @@ export default function Settings() {
   const [passwordAlgorithm, setPasswordAlgorithm] = useState('blake3');
   const [passwordSeed, setPasswordSeed] = useState('');
   const [passwordEmail, setPasswordEmail] = useState('');
-  const [bookmarks, setBookmarks] = useState([
-    {
-      title: 'Canvas (WUSTL)',
-      url: 'https://wustl.instructure.com/',
-      description: 'Daily assignments'
-    },
-    {
-      title: 'WebStac (WUSTL)', 
-      url: 'https://webstac.wustl.edu/',
-      description: 'Task manager'
-    },
-    {
-      title: 'LeetCode',
-      url: 'https://leetcode.com/',
-      description: 'Gym for coding'
-    },
-    {
-      title: 'Gmail',
-      url: 'https://gmail.com',
-      description: 'Email service (Personal)'
-    },
-    {
-      title: 'Outlook',
-      url: 'https://outlook.com',
-      description: 'Email service (Work)'
-    },
-    {
-      title: 'GitHub',
-      url: 'https://github.com',
-      description: 'Development platform'
-    },
-    {
-      title: 'Cloudflare',
-      url: 'https://cloudflare.com',
-      description: 'Web infrastructure & security'
-    },
-    {
-      title: 'Vercel',
-      url: 'https://vercel.com',
-      description: 'Deployment & hosting platform'
-    }
-  ]);
+  const [bookmarks, setBookmarks] = useState([]);
 
   useEffect(() => {
     // Load saved settings from localStorage
