@@ -39,7 +39,7 @@ function ThemeToggle() {
       </button>
 
       {showThemeMenu && (
-        <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg ring-1 ring-opacity-5">
+        <div className="absolute right-0 md:right-0 left-0 md:left-auto mt-2 w-36 rounded-md border z-10 bg-secondary">
           <div className="py-1 rounded-lg">
             <button
               className="block w-full px-4 py-2 text-sm hover:bg-secondary"

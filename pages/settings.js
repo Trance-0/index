@@ -15,10 +15,53 @@ export default function Settings() {
   const [passwordAlgorithm, setPasswordAlgorithm] = useState('blake3');
   const [passwordSeed, setPasswordSeed] = useState('');
   const [passwordEmail, setPasswordEmail] = useState('');
+  const [bookmarks, setBookmarks] = useState([
+    {
+      title: 'Canvas (WUSTL)',
+      url: 'https://wustl.instructure.com/',
+      description: 'Daily assignments'
+    },
+    {
+      title: 'WebStac (WUSTL)', 
+      url: 'https://webstac.wustl.edu/',
+      description: 'Task manager'
+    },
+    {
+      title: 'LeetCode',
+      url: 'https://leetcode.com/',
+      description: 'Gym for coding'
+    },
+    {
+      title: 'Gmail',
+      url: 'https://gmail.com',
+      description: 'Email service (Personal)'
+    },
+    {
+      title: 'Outlook',
+      url: 'https://outlook.com',
+      description: 'Email service (Work)'
+    },
+    {
+      title: 'GitHub',
+      url: 'https://github.com',
+      description: 'Development platform'
+    },
+    {
+      title: 'Cloudflare',
+      url: 'https://cloudflare.com',
+      description: 'Web infrastructure & security'
+    },
+    {
+      title: 'Vercel',
+      url: 'https://vercel.com',
+      description: 'Deployment & hosting platform'
+    }
+  ]);
 
   useEffect(() => {
     // Load saved settings from localStorage
     const savedSearches = localStorage.getItem('recentSearches');
+    const savedBookmarks = localStorage.getItem('bookmarks');
     const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
     const savedPasswordLength = parseInt(localStorage.getItem('passwordLength')) || 16;
@@ -41,6 +84,11 @@ export default function Settings() {
     } else {
       setSearchEngine('https://www.google.com/search?q={searchTerms}');
       localStorage.setItem('searchEngine', 'https://www.google.com/search?q={searchTerms}');
+    }
+    if (savedBookmarks) {
+      setBookmarks(JSON.parse(savedBookmarks));
+    } else {
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     }
   }, []);
 
@@ -91,6 +139,29 @@ export default function Settings() {
     localStorage.setItem('passwordEmail', newEmail);
   };
 
+  const handleBookmarkChange = (index, field, value) => {
+    const newBookmarks = [...bookmarks];
+    newBookmarks[index][field] = value;
+    setBookmarks(newBookmarks);
+    localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
+  };
+
+  const addBookmark = () => {
+    const newBookmarks = [...bookmarks, {
+      title: '',
+      url: '',
+      description: ''
+    }];
+    setBookmarks(newBookmarks);
+    localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
+  };
+
+  const removeBookmark = (index) => {
+    const newBookmarks = bookmarks.filter((_, i) => i !== index);
+    setBookmarks(newBookmarks);
+    localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
+  };
+
   const clearRecentSearches = () => {
     setRecentSearches([]);
     localStorage.removeItem('recentSearches');
@@ -99,6 +170,7 @@ export default function Settings() {
   const exportSettings = () => {
     const settings = {
       theme: currentTheme,
+      bookmarks: bookmarks,
       recentSearches: recentSearches,
       searchEngine: searchEngine,
       backgroundImage: backgroundImage,
@@ -129,6 +201,10 @@ export default function Settings() {
           const settings = JSON.parse(e.target.result);
           if (settings.theme) {
             setTheme(settings.theme);
+          }
+          if (settings.bookmarks) {
+            setBookmarks(settings.bookmarks);
+            localStorage.setItem('bookmarks', JSON.stringify(settings.bookmarks));
           }
           if (settings.recentSearches) {
             setRecentSearches(settings.recentSearches);
@@ -215,6 +291,54 @@ export default function Settings() {
                 <option value="dark">Dark</option>
                 <option value="system">System</option>
               </select>
+            </div>
+          </div>
+
+          <div className="rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Bookmark Settings</h2>
+            <div className="space-y-4">
+              {bookmarks.map((bookmark, index) => (
+                <div key={index} className="p-4 border rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-medium">Bookmark {index + 1}</h3>
+                    <button
+                      onClick={() => removeBookmark(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={bookmark.title}
+                      onChange={(e) => handleBookmarkChange(index, 'title', e.target.value)}
+                      placeholder="Title"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="url"
+                      value={bookmark.url}
+                      onChange={(e) => handleBookmarkChange(index, 'url', e.target.value)}
+                      placeholder="URL"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={bookmark.description}
+                      onChange={(e) => handleBookmarkChange(index, 'description', e.target.value)}
+                      placeholder="Description"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={addBookmark}
+                className="button-success px-4 py-2 rounded transition-colors"
+              >
+                Add Bookmark
+              </button>
             </div>
           </div>
 

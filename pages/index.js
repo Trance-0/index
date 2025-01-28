@@ -7,12 +7,14 @@ export default function Home() {
   const [recentSearches, setRecentSearches] = useState([]);
   const [searchInput, setSearchInput] = useState('');
   const [searchEngine, setSearchEngine] = useState('');
+  const [bookmarks, setBookmarks] = useState([]);
   const [backgroundImage, setBackgroundImage] = useState('');
 
   useEffect(() => {
     // Load recent searches and search engine from localStorage on component mount
     const savedSearches = localStorage.getItem('recentSearches');
     const savedSearchEngine = localStorage.getItem('searchEngine');
+    const savedBookmarks = localStorage.getItem('bookmarks');
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
 
     if (savedSearches) {
@@ -24,6 +26,9 @@ export default function Home() {
       // Default search engine if none set
       setSearchEngine('https://www.google.com/search?q={searchTerms}');
       localStorage.setItem('searchEngine', 'https://www.google.com/search?q={searchTerms}');
+    }
+    if (savedBookmarks) {
+      setBookmarks(JSON.parse(savedBookmarks));
     }
     setBackgroundImage(savedBackgroundImage);
   }, []);
@@ -47,12 +52,6 @@ export default function Home() {
     setSearchInput('');
   };
 
-  const handleSearchEngineChange = (e) => {
-    const newEngine = e.target.value;
-    setSearchEngine(newEngine);
-    localStorage.setItem('searchEngine', newEngine);
-  };
-
   const handleRecentSearchClick = (search) => {
     handleSearch(search);
   };
@@ -72,7 +71,7 @@ export default function Home() {
         >
           <div className="flex flex-col items-center pt-20 px-4">
             {/* Google-style logo */}
-            <h1 className="swc-title text-6xl font-bold mb-8">
+            <h1 className="inv-title text-6xl font-bold mb-8">
               Search <span className="animate-typing overflow-hidden whitespace-nowrap border-r-4 pr-1">with INDEX</span>
             </h1>
 
@@ -96,7 +95,7 @@ export default function Home() {
 
                 {/* Recent searches dropdown */}
                 {isSearchFocused && (
-                  <div className="absolute top-full left-0 right-0 mt-2 rounded-lg shadow-lg border z-10">
+                  <div className="absolute top-full left-0 right-0 mt-2 rounded-lg shadow-lg border z-10 bg-secondary">
                     {recentSearches.length > 0 ? (
                       <ul className="py-2">
                         {recentSearches.map((search, index) => (
@@ -124,92 +123,19 @@ export default function Home() {
 
             {/* Bookmarks grid */}
             <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
-              {/* Example bookmark cards */}
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://wustl.instructure.com/">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Canvas (WUSTL)
-                    </h3>
-                    <p className="text-sm">Daily assignments</p>
-                  </div>
-                </a>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://webstac.wustl.edu/">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                    <h3 className="text-lg font-semibold mb-2">
-                      WebStac (WUSTL)
-                    </h3>
-                    <p className="text-sm">Task manager</p>
-                  </div>
-                </a>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://leetcode.com/">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                  <h3 className="text-lg font-semibold mb-2">LeetCode</h3>
-                    <p className="text-sm">Gym for coding</p>
-                  </div>
-                </a>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://gmail.com">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                    <h3 className="text-lg font-semibold mb-2">Gmail</h3>
-                    <p className="text-sm">Email service (Personal)</p>
-                  </div>
-                </a>
-              </div>
-
-              
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://outlook.com">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                    <h3 className="text-lg font-semibold mb-2">Outlook</h3>
-                    <p className="text-sm">Email service (Work)</p>
-                  </div>
-                </a>
-              </div>
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://github.com">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                    <h3 className="text-lg font-semibold mb-2">GitHub</h3>
-                    <p className="text-sm">Development platform</p>
-                  </div>
-                </a>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://cloudflare.com">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                    <h3 className="text-lg font-semibold mb-2">Cloudflare</h3>
-                    <p className="text-sm">Web infrastructure & security</p>
-                  </div>
-                </a>
-              </div>
-
-              <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <a href="https://vercel.com">
-                  <div className="absolute inset-0 bg-opacity-60 group-hover:bg-secondary transition-opacity"></div>
-                  <div className="relative p-4">
-                    <h3 className="text-lg font-semibold mb-2">Vercel</h3>
-                    <p className="text-sm">Deployment & hosting platform</p>
-                  </div>
-                </a>
-              </div>
-
+              {bookmarks.map((bookmark, index) => (
+                <div key={index} className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <a href={bookmark.url}>
+                    <div className="absolute inset-0 bg-primary group-hover:bg-opacity-60 transition-opacity"></div>
+                    <div className="relative p-4">
+                      <h3 className="text-lg font-semibold mb-2">
+                        {bookmark.title}
+                      </h3>
+                      <p className="text-sm">{bookmark.description}</p>
+                    </div>
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
         </div>

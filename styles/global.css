@@ -6,6 +6,9 @@
     body {
         @apply dark:bg-gray-800 bg-white
     }
+    .bg-primary{
+        @apply dark:bg-gray-800 dark:bg-opacity-90 bg-white bg-opacity-90
+    }
     .bg-secondary {
         @apply dark:bg-gray-700 dark:bg-opacity-70 bg-gray-200 bg-opacity-70
     }
@@ -33,27 +36,24 @@
     }
     /*elements background colors*/
     .shadow-md{
-        @apply dark:bg-gray-800 dark:bg-opacity-90 bg-white bg-opacity-90
-    }
-    .py-1 {
-        @apply dark:bg-gray-800 dark:bg-opacity-90 bg-white bg-opacity-90
+        @apply dark:bg-gray-700 dark:bg-opacity-90 bg-white bg-opacity-90
     }
     /*main background colors*/
     main {
-        @apply dark:bg-gray-600 bg-gray-100
+        @apply dark:bg-gray-500 bg-gray-200
     }
     /*title colors*/
-    .swc-title {
+    .inv-title {
         @apply dark:text-gray-700 text-gray-500 
     }
     /*input background colors*/
     input {
-        @apply dark:bg-gray-900 bg-gray-100
+        @apply dark:bg-gray-800 bg-gray-100
     }
     textarea {
-        @apply dark:bg-gray-900 bg-gray-100
+        @apply dark:bg-gray-800 bg-gray-100
     }
     select {
-        @apply dark:bg-gray-900 bg-gray-100
+        @apply dark:bg-gray-800 bg-gray-100
     }
 }

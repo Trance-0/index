@@ -123,20 +123,18 @@ export default function RandomArrayGenerator() {
                                         Generate 2D Array
                                     </label>
                                 </div>
-                                {is2D && (
-                                    <div className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            id="multiline"
-                                            checked={multiline}
-                                            onChange={(e) => setMultiline(e.target.checked)}
-                                            className="rounded"
-                                        />
-                                        <label htmlFor="multiline" className="text-sm font-medium">
-                                            Multiline Output
-                                        </label>
-                                    </div>
-                                )}
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="multiline"
+                                        checked={multiline}
+                                        onChange={(e) => setMultiline(e.target.checked)}
+                                        className="rounded"
+                                    />
+                                    <label htmlFor="multiline" className="text-sm font-medium">
+                                        Multiline Output
+                                    </label>
+                                </div>
                             </div>
 
                             <button

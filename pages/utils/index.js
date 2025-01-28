@@ -32,7 +32,7 @@ export default function Utils() {
               <a href="/utils/graph_explorer" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
                   <h2 className="text-xl font-semibold mb-4">Graph explorer</h2>
-                  <p>Explore graphs in real time.</p>
+                  <p>Explore graphs in real time. (Testing, may not work)</p>
                 </div>
               </a>
 
@@ -48,7 +48,7 @@ export default function Utils() {
               <a href="/utils/pass_gen" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
                   <h2 className="text-xl font-semibold mb-4">Password generator</h2>
-                  <p>Generate a random password.</p>
+                  <p>Generate a random password. (Testing, may not work as expected)</p>
                 </div>
               </a>
 
@@ -64,7 +64,7 @@ export default function Utils() {
               <a href="/utils/random_arr_gen" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
                   <h2 className="text-xl font-semibold mb-4">Random array generator</h2>
-                  <p>Generate a random array, fun for testing.</p>
+                  <p>Generate a random array as test cases.</p>
                 </div>
               </a>
 
@@ -81,6 +81,14 @@ export default function Utils() {
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
                   <h2 className="text-xl font-semibold mb-4">Division raster</h2>
                   <p>Impressive paper.js project.</p>
+                </div>
+              </a>
+
+              {/* Mathlib Explorer */}
+              <a href="/utils/mathlib_explorer" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Mathlib Explorer</h2>
+                  <p>Explore mathlib using a graph.</p>
                 </div>
               </a>
 

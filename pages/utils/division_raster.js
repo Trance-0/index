@@ -110,9 +110,27 @@ export default function DivisionRasterPage() {
         <title>Division Raster</title>
       </Head>
       <Navbar />
-      <div className="flex flex-col items-center justify-center h-screen" style={{ height: `calc(100vh - 130px)` }}>
-        <canvas ref={canvasRef} id="canvas" className="w-full" style={{ height: `calc(100vh - 130px)` }}></canvas>
-      </div>
+      <main className="flex-grow">
+        <div className="min-h-full">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-secondary p-4 rounded-lg shadow-lg text-center" 
+             style={{
+               opacity: 0,
+               animation: 'fadeInOut 3s ease-in-out forwards'
+             }}>
+          <p>Use your own image by passing url to url param.<br/>
+             (e.g. https://index.trance-0.com/utils/division_raster?url=https://blob.trance-0.com/124958034_p2.jpg)</p>
+          <style jsx>{`
+            @keyframes fadeInOut {
+              0% { opacity: 0; }
+              10% { opacity: 1; }
+              80% { opacity: 1; }
+              100% { opacity: 0; }
+            }
+          `}</style>
+        </div>
+          <canvas ref={canvasRef} id="canvas" className="w-full" style={{ height: `calc(100vh - 140px)` }}></canvas>
+        </div>
+      </main>
       <Footer />
     </>
   )
