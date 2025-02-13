@@ -16,6 +16,12 @@ export default function Settings() {
   const [passwordSeed, setPasswordSeed] = useState('');
   const [passwordEmail, setPasswordEmail] = useState('');
   const [bookmarks, setBookmarks] = useState([]);
+  // Chatroom settings
+  const defaultModel = 'o3-mini';
+  const [message, setMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState([]);
+  const [openaiKey, setOpenaiKey] = useState('');
+  const [selectedModel, setSelectedModel] = useState(defaultModel);
 
   useEffect(() => {
     // Load saved settings from localStorage
@@ -28,13 +34,19 @@ export default function Settings() {
     const savedPasswordAlgorithm = localStorage.getItem('passwordAlgorithm') || 'blake3';
     const savedPasswordSeed = localStorage.getItem('passwordSeed') || '';
     const savedPasswordEmail = localStorage.getItem('passwordEmail') || '';
-    
+    const savedOpenaiKey = localStorage.getItem('openaiKey') || '';
+    const savedSelectedModel = localStorage.getItem('selectedModel') || defaultModel;
+    const savedChatHistory = localStorage.getItem('chatHistory');
+
     setBackgroundImage(savedBackgroundImage);
     setPasswordLength(savedPasswordLength);
     setPasswordCharset(savedPasswordCharset);
     setPasswordAlgorithm(savedPasswordAlgorithm);
     setPasswordSeed(savedPasswordSeed);
     setPasswordEmail(savedPasswordEmail);
+    setOpenaiKey(savedOpenaiKey);
+    setSelectedModel(savedSelectedModel);
+    
     if (savedSearches) {
       setRecentSearches(JSON.parse(savedSearches));
     }
@@ -48,6 +60,9 @@ export default function Settings() {
       setBookmarks(JSON.parse(savedBookmarks));
     } else {
       localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    }
+    if (savedChatHistory) {
+      setChatHistory(JSON.parse(savedChatHistory));
     }
   }, []);
 
@@ -126,6 +141,12 @@ export default function Settings() {
     localStorage.removeItem('recentSearches');
   };
 
+  const removeConversation = (index) => {
+    const newHistory = chatHistory.filter((_, i) => i !== index);
+    setChatHistory(newHistory);
+    localStorage.setItem('chatHistory', JSON.stringify(newHistory));
+  };
+
   const exportSettings = () => {
     const settings = {
       theme: currentTheme,
@@ -137,7 +158,10 @@ export default function Settings() {
       passwordCharset: passwordCharset,
       passwordAlgorithm: passwordAlgorithm,
       passwordSeed: passwordSeed,
-      passwordEmail: passwordEmail
+      passwordEmail: passwordEmail,
+      openaiKey: openaiKey,
+      chatHistory: chatHistory,
+      selectedModel: selectedModel
     };
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -197,6 +221,18 @@ export default function Settings() {
             setPasswordEmail(settings.passwordEmail);
             localStorage.setItem('passwordEmail', settings.passwordEmail);
           }
+          if (settings.openaiKey) {
+            setOpenaiKey(settings.openaiKey);
+            localStorage.setItem('openaiKey', settings.openaiKey);
+          }
+          if (settings.chatHistory) {
+            setChatHistory(settings.chatHistory);
+            localStorage.setItem('chatHistory', JSON.stringify(settings.chatHistory));
+          }
+          if (settings.selectedModel) {
+            setSelectedModel(settings.selectedModel);
+            localStorage.setItem('selectedModel', settings.selectedModel);
+          }
           setImportStatus('Settings imported successfully!');
           setTimeout(() => setImportStatus(''), 3000);
         } catch (error) {
@@ -254,54 +290,6 @@ export default function Settings() {
           </div>
 
           <div className="rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Bookmark Settings</h2>
-            <div className="space-y-4">
-              {bookmarks.map((bookmark, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Bookmark {index + 1}</h3>
-                    <button
-                      onClick={() => removeBookmark(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={bookmark.title}
-                      onChange={(e) => handleBookmarkChange(index, 'title', e.target.value)}
-                      placeholder="Title"
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                    <input
-                      type="url"
-                      value={bookmark.url}
-                      onChange={(e) => handleBookmarkChange(index, 'url', e.target.value)}
-                      placeholder="URL"
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                    <input
-                      type="text"
-                      value={bookmark.description}
-                      onChange={(e) => handleBookmarkChange(index, 'description', e.target.value)}
-                      placeholder="Description"
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              ))}
-              <button
-                onClick={addBookmark}
-                className="button-success px-4 py-2 rounded transition-colors"
-              >
-                Add Bookmark
-              </button>
-            </div>
-          </div>
-
-          <div className="rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Background Settings</h2>
             <div className="mb-6">
               <label htmlFor="backgroundImage" className="block mb-2">Background Image URL:</label>
@@ -314,7 +302,7 @@ export default function Settings() {
                 placeholder="Enter image URL..."
               />
               <p className="text-sm mt-2">
-                Enter a URL for the background image of the index page, notice that the image must be accessible by the public. For example, you can use a URL from Unsplash or another image hosting service, personally I recommend using self hosted wordpress server. Images from X, or other social media platforms are usually not accessible by the public.
+                Enter a URL for the background image of the index page, notice that the image must be accessible by the public. For example, you can use a URL from Unsplash or another image hosting service.
               </p>
               {backgroundImage && (
                 <div className="mt-4">
@@ -362,6 +350,54 @@ export default function Settings() {
                 className="button-warning px-4 py-2 rounded transition-colors"
               >
                 Clear Search History
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Bookmark Settings</h2>
+            <div className="space-y-4">
+              {bookmarks.map((bookmark, index) => (
+                <div key={index} className="p-4 border rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-medium">Bookmark {index + 1}</h3>
+                    <button
+                      onClick={() => removeBookmark(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={bookmark.title}
+                      onChange={(e) => handleBookmarkChange(index, 'title', e.target.value)}
+                      placeholder="Title"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="url"
+                      value={bookmark.url}
+                      onChange={(e) => handleBookmarkChange(index, 'url', e.target.value)}
+                      placeholder="URL"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={bookmark.description}
+                      onChange={(e) => handleBookmarkChange(index, 'description', e.target.value)}
+                      placeholder="Description"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={addBookmark}
+                className="button-success px-4 py-2 rounded transition-colors"
+              >
+                Add Bookmark
               </button>
             </div>
           </div>
@@ -429,6 +465,63 @@ export default function Settings() {
                 className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
                 placeholder="Enter email..."
               />
+            </div>
+          </div>
+
+          <div className="rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Chatroom Settings</h2>
+            <div className="space-y-6">
+              <div className="mb-6">
+                <label htmlFor="openaiKey" className="block mb-2">OpenAI Key:</label>
+                <input
+                  id="openaiKey"
+                  type="text"
+                  value={openaiKey}
+                  onChange={(e) => {
+                    setOpenaiKey(e.target.value);
+                    localStorage.setItem('openaiKey', e.target.value);
+                  }}
+                  className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
+                  placeholder="Enter OpenAI Key..."
+                />
+              </div>
+              <div className="mb-6">
+                <h3 className="text-lg mb-2">Conversations:</h3>
+                {chatHistory.length > 0 ? (
+                  <ul>
+                    {chatHistory.map((conversation, index) => (
+                      <li key={index} className="flex justify-between items-center py-2 border-b">
+                        <span>{conversation.topic}</span>
+                        <button
+                          onClick={() => removeConversation(index)}
+                          className="text-red-500 hover:text-red-700"
+
+                        >
+                          Delete
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+
+                ) : (
+                  <p>No conversations</p>
+                )}
+              </div>
+              <div className="mb-6">
+                <label htmlFor="selectedModel" className="block mb-2">Selected Model:</label>
+                <select
+                  id="selectedModel"
+                  value={selectedModel}
+                  onChange={(e) => {
+                    setSelectedModel(e.target.value);
+                    localStorage.setItem('selectedModel', e.target.value);
+                  }}
+                  className="border rounded px-3 py-1"
+                >
+                  <option value="gpt-3.5">gpt-3.5</option>
+                  <option value="gpt-4">gpt-4</option>
+                </select>
+              </div>
             </div>
           </div>
 

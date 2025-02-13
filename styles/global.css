@@ -17,19 +17,19 @@
     }
     /*button colors*/
     .button-info {
-        @apply dark:bg-blue-600 dark:bg-opacity-70 bg-blue-600 bg-opacity-70
+        @apply dark:bg-blue-600 dark:bg-opacity-70 bg-blue-500 bg-opacity-70
     }
     .button-info:hover {
         @apply dark:bg-blue-700 dark:bg-opacity-70 bg-blue-300 bg-opacity-70
     }
     .button-warning {
-        @apply dark:bg-red-600 dark:bg-opacity-70 bg-red-600 bg-opacity-70
+        @apply dark:bg-red-600 dark:bg-opacity-70 bg-red-500 bg-opacity-70
     }
     .button-warning:hover {
         @apply dark:bg-red-700 dark:bg-opacity-70 bg-red-300 bg-opacity-70
     }
     .button-success {
-        @apply dark:bg-green-600 dark:bg-opacity-70 bg-green-600 bg-opacity-70
+        @apply dark:bg-green-600 dark:bg-opacity-70 bg-green-500 bg-opacity-70
     }
     .button-success:hover {
         @apply dark:bg-green-700 dark:bg-opacity-70 bg-green-300 bg-opacity-70

@@ -92,6 +92,14 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Chat with AI */}
+              <a href="/utils/chatroom" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Chat with AI</h2>
+                  <p>Chat with AI using OpenAI's API.</p>
+                </div>
+              </a>
+
             </div>
           </div>
         </div>
