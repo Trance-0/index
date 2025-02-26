@@ -17,16 +17,22 @@ export default function RandomArrayGenerator() {
     const generateRandomArray = () => {
         if (is2D) {
             // Generate 2D array
-            const newArray = Array.from({ length: rows }, () =>
-                Array.from({ length: cols }, () =>
+            const newArray = (maxValue%1===0)&&(minValue%1===0)?Array.from({ length: rows }, () =>
+                Array.from({ length: cols }, () => 
                     Math.floor(Math.random() * (maxValue - minValue + 1) + minValue)
+                )
+            ):Array.from({ length: rows }, () =>
+                Array.from({ length: cols }, () => 
+                    Math.random() * (maxValue - minValue + 1) + minValue
                 )
             );
             setGeneratedArray(newArray);
         } else {
             // Generate 1D array
-            const newArray = Array.from({ length: rows }, () =>
+            const newArray = (maxValue%1===0)&&(minValue%1===0)?Array.from({ length: rows }, () =>
                 Math.floor(Math.random() * (maxValue - minValue + 1) + minValue)
+            ):Array.from({ length: rows }, () =>
+                Math.random() * (maxValue - minValue + 1) + minValue
             );
             setGeneratedArray(newArray);
         }
@@ -93,9 +99,10 @@ export default function RandomArrayGenerator() {
                             <div>
                                 <label className="block text-sm font-medium mb-1">Minimum Value</label>
                                 <input
-                                    type="number"
                                     value={minValue}
-                                    onChange={(e) => setMinValue(parseInt(e.target.value))}
+                                    onChange={(e) => {
+                                        if (e.target.value==="" || !e.target.value.match(/^-?\d*(\.\d+)?$/)) return;
+                                        setMinValue(parseFloat(e.target.value))}}
                                     className="w-full p-2 border rounded"
                                     placeholder="Enter minimum value"
                                 />
@@ -104,9 +111,10 @@ export default function RandomArrayGenerator() {
                             <div>
                                 <label className="block text-sm font-medium mb-1">Maximum Value</label>
                                 <input
-                                    type="number"
                                     value={maxValue}
-                                    onChange={(e) => setMaxValue(parseInt(e.target.value))}
+                                    onChange={(e) => {
+                                        if (e.target.value==="" || !e.target.value.match(/^-?\d*(\.\d+)?$/)) return;
+                                        setMaxValue(parseFloat(e.target.value))}}
                                     className="w-full p-2 border rounded"
                                     placeholder="Enter maximum value"
                                 />
