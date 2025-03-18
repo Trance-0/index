@@ -11,7 +11,7 @@ export default function RandomArrayGenerator() {
     const [minValue, setMinValue] = useState(0);
     const [maxValue, setMaxValue] = useState(100);
     const [is2D, setIs2D] = useState(false);
-    const [multiline, setMultiline] = useState(true);
+    const [multiline, setMultiline] = useState(false);
     const [generatedArray, setGeneratedArray] = useState([]);
 
     const generateRandomArray = () => {
