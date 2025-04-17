@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react';
-import Navbar from '../navbar';
-import Footer from '../footer';
 
 export default function GraphGenerator() {
   const [numNodes, setNumNodes] = useState(5);
@@ -15,10 +13,11 @@ export default function GraphGenerator() {
   const [maxNodeValue, setMaxNodeValue] = useState(100);
   const [generatedGraph, setGeneratedGraph] = useState('');
   const [copyButtonText, setCopyButtonText] = useState('Copy to Clipboard');
+  const [multiline, setMultiline] = useState(false);
 
   const generateGraph = () => {
     let result;
-    
+
     if (outputType === 'binarytree' || outputType === 'tree') {
       if (outputType === 'binarytree') {
         result = generateBinaryTree(treeHeight);
@@ -26,7 +25,7 @@ export default function GraphGenerator() {
         result = generateTree(numNodes);
       }
     } else {
-      switch(graphType) {
+      switch (graphType) {
         case 'acyclic':
           result = generateAcyclicGraph();
           break;
@@ -44,57 +43,56 @@ export default function GraphGenerator() {
       }
     }
 
-    setGeneratedGraph(JSON.stringify(result, null, 2));
+    setGeneratedGraph(JSON.stringify(result, null, multiline ? 2 : 0));
   };
 
   const generateTree = (n) => {
     const result = new Array(n).fill(-1);
-    
     // Start from index 1 since 0 will be assigned later
-    for (let i = 1; i < n-1; i++) {
+    for (let i = 1; i < n - 1; i++) {
       // Randomly choose a parent from nodes that come after this one
       const possibleParents = [];
-      for (let j = i+1; j < n; j++) {
+      for (let j = i + 1; j < n; j++) {
         possibleParents.push(j);
       }
       const parentIdx = Math.floor(Math.random() * possibleParents.length);
       result[i] = possibleParents[parentIdx];
     }
-    
+
     // Ensure at least one node points to the root (last node)
     if (n > 1) {
-      const firstNode = Math.floor(Math.random() * (n-1));
-      result[firstNode] = n-1;
+      const firstNode = Math.floor(Math.random() * (n - 1));
+      result[firstNode] = n - 1;
     }
-    
+
     return result;
   };
 
   const generateBinaryTree = (height) => {
     const maxNodes = Math.pow(2, height) - 1;
     const result = new Array(maxNodes).fill(null);
-    
+
     // Generate random values for nodes
     let nodeCount = 1; // Start with root
     result[0] = Math.floor(Math.random() * (maxNodeValue - minNodeValue + 1)) + minNodeValue;
-    
+
     // For each level except the last
-    for (let level = 0; level < height-1; level++) {
+    for (let level = 0; level < height - 1; level++) {
       const levelStart = Math.pow(2, level) - 1;
-      const levelEnd = Math.pow(2, level+1) - 1;
-      
+      const levelEnd = Math.pow(2, level + 1) - 1;
+
       // For each node in current level
       for (let i = levelStart; i < levelEnd; i++) {
         if (result[i] !== null) {
           // Randomly decide to add children
-          const leftChild = 2*i + 1;
-          const rightChild = 2*i + 2;
-          
+          const leftChild = 2 * i + 1;
+          const rightChild = 2 * i + 2;
+
           if (Math.random() > 0.3 && leftChild < maxNodes) {
             result[leftChild] = Math.floor(Math.random() * (maxNodeValue - minNodeValue + 1)) + minNodeValue;
             nodeCount++;
           }
-          
+
           if (Math.random() > 0.3 && rightChild < maxNodes) {
             result[rightChild] = Math.floor(Math.random() * (maxNodeValue - minNodeValue + 1)) + minNodeValue;
             nodeCount++;
@@ -102,7 +100,7 @@ export default function GraphGenerator() {
         }
       }
     }
-    
+
     return result;
   };
 
@@ -111,7 +109,7 @@ export default function GraphGenerator() {
       const adjList = Array(numNodes).fill().map(() => []);
       // Only connect some nodes, leaving others isolated
       const connectedNodes = new Set();
-      
+
       // Ensure at least one node is connected
       const firstNode = Math.floor(Math.random() * numNodes);
       connectedNodes.add(firstNode);
@@ -134,7 +132,7 @@ export default function GraphGenerator() {
     } else { // edgelist
       const edges = [];
       const connectedNodes = new Set();
-      
+
       // Ensure at least one node is connected
       const firstNode = Math.floor(Math.random() * numNodes);
       connectedNodes.add(firstNode);
@@ -163,7 +161,7 @@ export default function GraphGenerator() {
       const adjList = Array(numNodes).fill().map(() => []);
       for (let i = 0; i < numNodes - 1; i++) {
         const numEdges = Math.floor(Math.random() * (numNodes - i - 1)) + 1;
-        const possibleTargets = Array.from({length: numNodes-i-1}, (_, k) => k+i+1);
+        const possibleTargets = Array.from({ length: numNodes - i - 1 }, (_, k) => k + i + 1);
         for (let j = 0; j < numEdges; j++) {
           const targetIdx = Math.floor(Math.random() * possibleTargets.length);
           adjList[i].push(possibleTargets[targetIdx]);
@@ -175,7 +173,7 @@ export default function GraphGenerator() {
       const edges = [];
       for (let i = 0; i < numNodes - 1; i++) {
         const numEdges = Math.floor(Math.random() * (numNodes - i - 1)) + 1;
-        const possibleTargets = Array.from({length: numNodes-i-1}, (_, k) => k+i+1);
+        const possibleTargets = Array.from({ length: numNodes - i - 1 }, (_, k) => k + i + 1);
         for (let j = 0; j < numEdges; j++) {
           const targetIdx = Math.floor(Math.random() * possibleTargets.length);
           const weight = Math.floor(Math.random() * (maxWeight - minWeight + 1)) + minWeight;
@@ -257,166 +255,173 @@ export default function GraphGenerator() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Graph Generator</h1>
-          
-          <div className="bg-secondary rounded-lg shadow-md p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {(outputType === 'tree' || outputType === 'binarytree') ? (
-                <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
-                    Tree Height
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="6"
-                    value={treeHeight}
-                    onChange={(e) => setTreeHeight(parseInt(e.target.value))}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
-                    Number of Nodes
-                  </label>
-                  <input
-                    type="number"
-                    min="2"
-                    max="20"
-                    value={numNodes}
-                    onChange={(e) => setNumNodes(parseInt(e.target.value))}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-              )}
-              
+
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Graph Generator</h1>
+
+      <div className="bg-secondary rounded-lg shadow-md p-6 max-w-2xl mx-auto">
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {(outputType === 'tree' || outputType === 'binarytree') ? (
               <div>
                 <label className="block text-sm font-medium text-secondary mb-2">
-                  Output Type
+                  Tree Height
                 </label>
-                <select
-                  value={outputType}
-                  onChange={(e) => setOutputType(e.target.value)}
+                <input
+                  type="number"
+                  min="1"
+                  max="6"
+                  value={treeHeight}
+                  onChange={(e) => setTreeHeight(parseInt(e.target.value))}
                   className="w-full p-2 border rounded"
-                >
-                  <option value="adjlist">Adjacency List</option>
-                  <option value="edgelist">Edge List</option>
-                  <option value="tree">Tree</option>
-                  <option value="binarytree">Binary Tree</option>
-                </select>
+                />
               </div>
-              
-              {(outputType !== 'tree' && outputType !== 'binarytree') && (
-                <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
-                    Graph Type
-                  </label>
-                  <select
-                    value={graphType}
-                    onChange={(e) => setGraphType(e.target.value)}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="acyclic">Acyclic</option>
-                    <option value="bidirectional">Bidirectional</option>
-                    <option value="cyclic">Cyclic</option>
-                    <option value="sparse">Sparse</option>
-                  </select>
-                </div>
-              )}
-
-              {(outputType === 'binarytree') && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Min Node Value
-                    </label>
-                    <input
-                      type="number"
-                      value={minNodeValue}
-                      onChange={(e) => setMinNodeValue(parseInt(e.target.value))}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Node Value
-                    </label>
-                    <input
-                      type="number"
-                      value={maxNodeValue}
-                      onChange={(e) => setMaxNodeValue(parseInt(e.target.value))}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                </>
-              )}
-
-              {outputType === 'edgelist' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Min Edge Weight
-                    </label>
-                    <input
-                      type="number"
-                      value={minWeight}
-                      onChange={(e) => setMinWeight(parseInt(e.target.value))}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Edge Weight
-                    </label>
-                    <input
-                      type="number"
-                      value={maxWeight}
-                      onChange={(e) => setMaxWeight(parseInt(e.target.value))}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-            
-            <button
-              onClick={generateGraph}
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Generate Graph
-            </button>
-            
-            {generatedGraph && (
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Generated Graph
-                  </label>
-                  <button
-                    onClick={copyToClipboard}
-                    className="bg-gray-100 text-gray-600 px-3 py-1 rounded hover:bg-gray-200"
-                  >
-                    {copyButtonText}
-                  </button>
-                </div>
-                <textarea
-                  value={generatedGraph}
-                  readOnly
-                  className="w-full h-64 p-2 border rounded font-mono text-sm"
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-2">
+                  Number of Nodes
+                </label>
+                <input
+                  type="number"
+                  min="2"
+                  max="20"
+                  value={numNodes}
+                  onChange={(e) => setNumNodes(parseInt(e.target.value))}
+                  className="w-full p-2 border rounded"
                 />
               </div>
             )}
-          </div>
-        </div>
-      </main>
 
-      <Footer />
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-2">
+                Output Type
+              </label>
+              <select
+                value={outputType}
+                onChange={(e) => setOutputType(e.target.value)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="adjlist">Adjacency List</option>
+                <option value="edgelist">Edge List</option>
+                <option value="tree">Tree</option>
+                <option value="binarytree">Binary Tree</option>
+              </select>
+            </div>
+
+            {(outputType !== 'tree' && outputType !== 'binarytree') && (
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-2">
+                  Graph Type
+                </label>
+                <select
+                  value={graphType}
+                  onChange={(e) => setGraphType(e.target.value)}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="acyclic">Acyclic</option>
+                  <option value="bidirectional">Bidirectional</option>
+                  <option value="cyclic">Cyclic</option>
+                  <option value="sparse">Sparse</option>
+                </select>
+              </div>
+            )}
+
+            {(outputType === 'binarytree') && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Min Node Value
+                  </label>
+                  <input
+                    type="number"
+                    value={minNodeValue}
+                    onChange={(e) => setMinNodeValue(parseInt(e.target.value))}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Max Node Value
+                  </label>
+                  <input
+                    type="number"
+                    value={maxNodeValue}
+                    onChange={(e) => setMaxNodeValue(parseInt(e.target.value))}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+              </>
+            )}
+
+            {outputType === 'edgelist' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Min Edge Weight
+                  </label>
+                  <input
+                    type="number"
+                    value={minWeight}
+                    onChange={(e) => setMinWeight(parseInt(e.target.value))}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Max Edge Weight
+                  </label>
+                  <input
+                    type="number"
+                    value={maxWeight}
+                    onChange={(e) => setMaxWeight(parseInt(e.target.value))}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+              </>
+            )}
+          </div><div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="multiline"
+                checked={multiline}
+                onChange={(e) => setMultiline(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="multiline" className="text-sm font-medium">
+                Multiline Output
+              </label>
+            </div>
+          </div>
+
+          <button
+            onClick={generateGraph}
+            className="w-full button-info text-white p-2 rounded hover:bg-blue-600 transition-colors"
+          >
+            Generate Graph
+          </button>
+
+          {generatedGraph && (
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-medium">Generated Graph:</h2>
+                <button
+                  onClick={copyToClipboard}
+                  className="bg-secondary text-secondary px-3 py-1 rounded hover:bg-gray-200"
+                >
+                  {copyButtonText}
+                </button>
+              </div>
+              <textarea
+                value={generatedGraph}
+                readOnly
+                className="w-full h-64 p-2 border rounded font-mono text-sm"
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,17 @@
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from './navbar'
 
 export default function Home() {
+  const searchInputRef = useRef(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
   const [searchInput, setSearchInput] = useState('');
   const [searchEngine, setSearchEngine] = useState('');
+  const [suggestionProvider, setSuggestionProvider] = useState('https://suggestqueries.google.com/complete/search?client=firefox&q=');
+  const [maxSuggestions, setMaxSuggestions] = useState(5);
+  const [maxRecentSearchesInSuggestions, setMaxRecentSearchesInSuggestions] = useState(5);
+  const [suggestions, setSuggestions] = useState([]);
   const [bookmarks, setBookmarks] = useState([
     {
       title: 'Canvas (WUSTL)',
@@ -52,14 +57,24 @@ export default function Home() {
   const [backgroundImage, setBackgroundImage] = useState('');
 
   useEffect(() => {
+    // Focus search input on component mount
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
     // Load recent searches and search engine from localStorage on component mount
     const savedSearches = localStorage.getItem('recentSearches');
     const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedBookmarks = localStorage.getItem('bookmarks');
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
+    const savedSuggestionProvider = localStorage.getItem('suggestionProvider');
+    const savedMaxSuggestions = localStorage.getItem('maxSuggestions');
+    const savedMaxRecentSearchesInSuggestions = localStorage.getItem('maxRecentSearchesInSuggestions');
 
     if (savedSearches) {
-      setRecentSearches(JSON.parse(savedSearches));
+      setRecentSearches(JSON.parse(savedSearches).slice(0, maxRecentSearchesInSuggestions));
     }
     if (savedSearchEngine) {
       setSearchEngine(savedSearchEngine);
@@ -68,17 +83,73 @@ export default function Home() {
       setSearchEngine('https://www.google.com/search?q={searchTerms}');
       localStorage.setItem('searchEngine', 'https://www.google.com/search?q={searchTerms}');
     }
+    if (savedSuggestionProvider) {
+      setSuggestionProvider(savedSuggestionProvider);
+    } else {
+      // Default suggestion provider if none set
+      setSuggestionProvider('https://suggestqueries.google.com/complete/search?client=firefox&q=');
+      localStorage.setItem('suggestionProvider', 'https://suggestqueries.google.com/complete/search?client=firefox&q=');
+    }
+    if (savedMaxSuggestions) {
+      setMaxSuggestions(savedMaxSuggestions);
+    } else {
+      // Default max suggestions if none set
+      setMaxSuggestions(5);
+      localStorage.setItem('maxSuggestions', 5);
+    }
+    if (savedMaxRecentSearchesInSuggestions) {
+      setMaxRecentSearchesInSuggestions(savedMaxRecentSearchesInSuggestions);
+    } else {
+      // Default max recent searches in suggestions if none set
+      setMaxRecentSearchesInSuggestions(5);
+      localStorage.setItem('maxRecentSearchesInSuggestions', 5);
+    }
     if (savedBookmarks) {
       setBookmarks(JSON.parse(savedBookmarks));
     }
     setBackgroundImage(savedBackgroundImage);
   }, []);
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchInput.trim().length > 0) {
+        try {
+          const response = await fetch(
+            `${suggestionProvider}${encodeURIComponent(searchInput)}`
+          );
+          const data = await response.json();
+          // Filter and limit suggestions
+          const filteredSuggestions = data[1] || [];
+          const limitedSuggestions = filteredSuggestions.slice(0, maxSuggestions);
+          
+          // Match with recent searches
+          const matchingRecentSearches = recentSearches
+            .filter(search => search.toLowerCase().includes(searchInput.toLowerCase()))
+            .slice(0, maxSuggestions - limitedSuggestions.length);
+          
+          setSuggestions([...limitedSuggestions, ...matchingRecentSearches]);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+          // Fallback to recent searches if API fails
+          const matchingRecentSearches = recentSearches
+            .filter(search => search.toLowerCase().includes(searchInput.toLowerCase()))
+            .slice(0, maxSuggestions);
+          setSuggestions([ ...matchingRecentSearches]);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchInput, recentSearches]);
+
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) return;
 
     // Add new search to recent searches
-    const newSearches = [searchTerm, ...recentSearches.slice(0, 4)];
+    const newSearches = [searchTerm, ...recentSearches.filter(s => s !== searchTerm)].slice(0, maxRecentSearches);
     setRecentSearches(newSearches);
     localStorage.setItem('recentSearches', JSON.stringify(newSearches));
 
@@ -95,6 +166,11 @@ export default function Home() {
 
   const handleRecentSearchClick = (search) => {
     handleSearch(search);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchInput(suggestion);
+    handleSearch(suggestion);
   };
 
   return (
@@ -120,6 +196,7 @@ export default function Home() {
             <div className="w-full max-w-2xl mb-16">
               <form onSubmit={handleSubmit} className="relative">
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
@@ -134,10 +211,27 @@ export default function Home() {
                   </svg>
                 </button>
 
-                {/* Recent searches dropdown */}
-                {isSearchFocused && (
+                {/* Search suggestions and recent searches dropdown */}
+                {isSearchFocused && (suggestions.length > 0 || recentSearches.length > 0) && (
                   <div className="absolute top-full left-0 right-0 mt-2 rounded-lg shadow-lg border z-10 bg-secondary">
-                    {recentSearches.length > 0 ? (
+                    {suggestions.length > 0 ? (
+                      <ul className="py-2">
+                        {suggestions.map((suggestion, index) => (
+                          <li
+                            key={index}
+                            className="px-4 py-2 hover:bg-opacity-10 cursor-pointer"
+                            onClick={() => handleSuggestionClick(suggestion)}
+                          >
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                              {suggestion}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : recentSearches.length > 0 ? (
                       <ul className="py-2">
                         {recentSearches.map((search, index) => (
                           <li
@@ -155,7 +249,7 @@ export default function Home() {
                         ))}
                       </ul>
                     ) : (
-                      <div className="px-4 py-2">No recent searches</div>
+                      <div className="px-4 py-2">No suggestions available</div>
                     )}
                   </div>
                 )}

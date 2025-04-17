@@ -36,14 +36,6 @@ export default function Utils() {
                 </div>
               </a>
 
-              {/* Graph generator */}
-              <a href="/utils/graph_generator" className="h-full">
-                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
-                  <h2 className="text-xl font-semibold mb-4">Graph generator</h2>
-                  <p>Generate a graph.</p>
-                </div>
-              </a>
-
               {/* Password generator */}
               <a href="/utils/pass_gen" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
@@ -56,15 +48,7 @@ export default function Utils() {
               <a href="/utils/random_gen" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
                   <h2 className="text-xl font-semibold mb-4">Random generator</h2>
-                  <p>Generate a random number or string as you need.</p>
-                </div>
-              </a>
-
-              {/* Random array generator */}
-              <a href="/utils/random_arr_gen" className="h-full">
-                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
-                  <h2 className="text-xl font-semibold mb-4">Random array generator</h2>
-                  <p>Generate a random array as test cases.</p>
+                  <p>Generate a random number/array/graph/permutation or string as you need.</p>
                 </div>
               </a>
 

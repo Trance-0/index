@@ -6,49 +6,130 @@ import Footer from './footer'
 
 export default function Settings() {
   const { theme: currentTheme, setTheme } = useTheme();
-  const [recentSearches, setRecentSearches] = useState([]);
   const [importStatus, setImportStatus] = useState('');
-  const [searchEngine, setSearchEngine] = useState('');
+  // bookmarks settings
+  const [bookmarks, setBookmarks] = useState([]);
+  // background settings
   const [backgroundImage, setBackgroundImage] = useState('');
+  // search settings
+  const [searchEngine, setSearchEngine] = useState('');
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [maxSuggestions, setMaxSuggestions] = useState(5);
+  const [maxRecentSearchesInSuggestions, setMaxRecentSearchesInSuggestions] = useState(5);
+  const [suggestionProvider, setSuggestionProvider] = useState('');
+  // Password Generator Settings
   const [passwordLength, setPasswordLength] = useState(16);
   const [passwordCharset, setPasswordCharset] = useState('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/');
   const [passwordAlgorithm, setPasswordAlgorithm] = useState('blake3');
   const [passwordSeed, setPasswordSeed] = useState('');
   const [passwordEmail, setPasswordEmail] = useState('');
-  const [bookmarks, setBookmarks] = useState([]);
+
+
+  const defaultBookmarks = [
+    {
+      title: 'Canvas (WUSTL)',
+      url: 'https://wustl.instructure.com/',
+      description: 'Daily assignments'
+    },
+    {
+      title: 'WebStac (WUSTL)', 
+      url: 'https://webstac.wustl.edu/',
+      description: 'Task manager'
+    },
+    {
+      title: 'LeetCode',
+      url: 'https://leetcode.com/',
+      description: 'Gym for coding'
+    },
+    {
+      title: 'Gmail',
+      url: 'https://gmail.com',
+      description: 'Email service (Personal)'
+    },
+    {
+      title: 'Outlook',
+      url: 'https://outlook.com',
+      description: 'Email service (Work)'
+    },
+    {
+      title: 'GitHub',
+      url: 'https://github.com',
+      description: 'Development platform'
+    },
+    {
+      title: 'Cloudflare',
+      url: 'https://cloudflare.com',
+      description: 'Web infrastructure & security'
+    },
+    {
+      title: 'Vercel',
+      url: 'https://vercel.com',
+      description: 'Deployment & hosting platform'
+    }
+  ];
 
   useEffect(() => {
     // Load saved settings from localStorage
-    const savedSearches = localStorage.getItem('recentSearches');
+    // bookmarks settings
     const savedBookmarks = localStorage.getItem('bookmarks');
-    const savedSearchEngine = localStorage.getItem('searchEngine');
+    // background settings
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
+    // search settings
+    const savedSearchEngine = localStorage.getItem('searchEngine');
+    const savedRecentSearches = localStorage.getItem('recentSearches');
+    const savedMaxSuggestions = localStorage.getItem('maxSuggestions');
+    const savedMaxRecentSearchesInSuggestions = localStorage.getItem('maxRecentSearchesInSuggestions');
+    const savedSuggestionProvider = localStorage.getItem('suggestionProvider');
+    // password generator settings
     const savedPasswordLength = parseInt(localStorage.getItem('passwordLength')) || 16;
     const savedPasswordCharset = localStorage.getItem('passwordCharset') || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     const savedPasswordAlgorithm = localStorage.getItem('passwordAlgorithm') || 'blake3';
     const savedPasswordSeed = localStorage.getItem('passwordSeed') || '';
     const savedPasswordEmail = localStorage.getItem('passwordEmail') || '';
     
-    setBackgroundImage(savedBackgroundImage);
-    setPasswordLength(savedPasswordLength);
-    setPasswordCharset(savedPasswordCharset);
-    setPasswordAlgorithm(savedPasswordAlgorithm);
-    setPasswordSeed(savedPasswordSeed);
-    setPasswordEmail(savedPasswordEmail);
-    if (savedSearches) {
-      setRecentSearches(JSON.parse(savedSearches));
+    // bookmarks settings
+    if (savedBookmarks) {
+      setBookmarks(JSON.parse(savedBookmarks));
+    } else {
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     }
+    // background settings
+    setBackgroundImage(savedBackgroundImage);
+    // search settings
     if (savedSearchEngine) {
       setSearchEngine(savedSearchEngine);
     } else {
       setSearchEngine('https://www.google.com/search?q={searchTerms}');
       localStorage.setItem('searchEngine', 'https://www.google.com/search?q={searchTerms}');
     }
-    if (savedBookmarks) {
-      setBookmarks(JSON.parse(savedBookmarks));
-    } else {
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    if (savedRecentSearches) {
+      setRecentSearches(JSON.parse(savedRecentSearches));
     }
+    if (savedSuggestionProvider) {
+      setSuggestionProvider(savedSuggestionProvider);
+    } else {
+      setSuggestionProvider('https://suggestqueries.google.com/complete/search?client=firefox&q={searchTerms}');
+      localStorage.setItem('suggestionProvider', 'https://suggestqueries.google.com/complete/search?client=firefox&q={searchTerms}');
+    }
+    if (savedMaxRecentSearchesInSuggestions) {
+      setMaxRecentSearchesInSuggestions(savedMaxRecentSearchesInSuggestions);
+    } else {
+      setMaxRecentSearchesInSuggestions(5);
+      localStorage.setItem('maxRecentSearchesInSuggestions', 5);
+    }
+    if (savedMaxSuggestions) {
+      setMaxSuggestions(savedMaxSuggestions);
+    } else {
+      setMaxSuggestions(5);
+      localStorage.setItem('maxSuggestions', 5);
+    }
+    // password generator settings
+    setPasswordLength(savedPasswordLength);
+    setPasswordCharset(savedPasswordCharset);
+    setPasswordAlgorithm(savedPasswordAlgorithm);
+    setPasswordSeed(savedPasswordSeed);
+    setPasswordEmail(savedPasswordEmail);
+    
   }, []);
 
   const handleThemeChange = (e) => {
@@ -66,6 +147,24 @@ export default function Settings() {
     const newEngine = e.target.value;
     setSearchEngine(newEngine);
     localStorage.setItem('searchEngine', newEngine);
+  };
+
+  const handleSuggestionProviderChange = (e) => {
+    const newProvider = e.target.value;
+    setSuggestionProvider(newProvider);
+    localStorage.setItem('suggestionProvider', newProvider);
+  };
+
+  const handleMaxSuggestionsChange = (e) => {
+    const newMax = parseInt(e.target.value);
+    setMaxSuggestions(newMax);
+    localStorage.setItem('maxSuggestions', newMax);
+  };
+
+  const handleMaxRecentSearchesInSuggestionsChange = (e) => {
+    const newMax = parseInt(e.target.value);
+    setMaxRecentSearchesInSuggestions(newMax);
+    localStorage.setItem('maxRecentSearchesInSuggestions', newMax);
   };
 
   const handlePasswordLengthChange = (e) => {
@@ -121,6 +220,11 @@ export default function Settings() {
     localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
   };
 
+  const restoreDefaultBookmarks = () => {
+    setBookmarks(defaultBookmarks);
+    localStorage.setItem('bookmarks', JSON.stringify(defaultBookmarks));
+  };
+
   const clearRecentSearches = () => {
     setRecentSearches([]);
     localStorage.removeItem('recentSearches');
@@ -131,6 +235,9 @@ export default function Settings() {
       theme: currentTheme,
       bookmarks: bookmarks,
       recentSearches: recentSearches,
+      maxSuggestions: maxSuggestions,
+      maxRecentSearchesInSuggestions: maxRecentSearchesInSuggestions,
+      suggestionProvider: suggestionProvider,
       searchEngine: searchEngine,
       backgroundImage: backgroundImage,
       passwordLength: passwordLength,
@@ -148,6 +255,26 @@ export default function Settings() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+  
+  const downloadSettingsFromURL = async (url) => {
+    try {
+      setImportStatus('Downloading...');
+      const response = await fetch(url);
+      const settings = await response.json();
+      
+      // Create a synthetic event object to match the importSettings function's expected input
+      const syntheticEvent = {
+        target: {
+          files: [new File([JSON.stringify(settings)], 'settings.json', { type: 'application/json' })]
+        }
+      };
+      
+      importSettings(syntheticEvent);
+    } catch (error) {
+      setImportStatus(`Error: ${error.message}`);
+      setTimeout(() => setImportStatus(''), 3000);
+    }
   };
 
   const importSettings = (event) => {
@@ -172,6 +299,18 @@ export default function Settings() {
           if (settings.searchEngine) {
             setSearchEngine(settings.searchEngine);
             localStorage.setItem('searchEngine', settings.searchEngine);
+          }
+          if (settings.suggestionProvider) {
+            setSuggestionProvider(settings.suggestionProvider);
+            localStorage.setItem('suggestionProvider', settings.suggestionProvider);
+          }
+          if (settings.maxSuggestions) {
+            setMaxSuggestions(settings.maxSuggestions);
+            localStorage.setItem('maxSuggestions', settings.maxSuggestions);
+          }
+          if (settings.maxRecentSearchesInSuggestions) {
+            setMaxRecentSearchesInSuggestions(settings.maxRecentSearchesInSuggestions);
+            localStorage.setItem('maxRecentSearchesInSuggestions', settings.maxRecentSearchesInSuggestions);
           }
           if (settings.backgroundImage) {
             setBackgroundImage(settings.backgroundImage);
@@ -298,6 +437,12 @@ export default function Settings() {
               >
                 Add Bookmark
               </button>
+              <button
+                onClick={restoreDefaultBookmarks}
+                className="button-warning ms-4 px-4 py-2 rounded transition-colors"
+              >
+                Restore Default Bookmarks
+              </button>
             </div>
           </div>
 
@@ -345,6 +490,42 @@ export default function Settings() {
               <p className="text-sm mt-2">
                 Use {'{searchTerms}'} as a placeholder for the search query
               </p>
+            </div>
+            <div className="mb-6">
+              <label htmlFor="suggestionProvider" className="block mb-2">Suggestion Provider URL:</label>
+              <input
+                id="suggestionProvider"
+                type="text"
+                value={suggestionProvider}
+                onChange={handleSuggestionProviderChange}
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
+                placeholder="Enter suggestion provider URL with {searchTerms} placeholder..."
+              />
+              <p className="text-sm mt-2">
+                Use {'{searchTerms}'} as a placeholder for the search query
+              </p>
+            </div>
+            <div className="mb-6">
+              <label htmlFor="maxSuggestions" className="block mb-2">Max Suggestions:</label>
+              <input
+                id="maxSuggestions"
+                type="number"
+                value={maxSuggestions}
+                onChange={handleMaxSuggestionsChange}
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
+                placeholder="Enter max suggestions..."
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="maxRecentSearchesInSuggestions" className="block mb-2">Max Recent Searches in Suggestions:</label>
+              <input
+                id="maxRecentSearchesInSuggestions"
+                type="number"
+                value={maxRecentSearchesInSuggestions}
+                onChange={handleMaxRecentSearchesInSuggestionsChange}
+                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm" 
+                placeholder="Enter max recent searches in suggestions..."
+              />
             </div>
             <div>
               <h3 className="text-lg mb-2">Recent Searches:</h3>
@@ -443,9 +624,9 @@ export default function Settings() {
                   Export Settings
                 </button>
               </div>
-              <div className="flex flex-col">
-                <label htmlFor="import" className="mb-2">Import Settings:</label>
-                <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col">
+                  <label htmlFor="import" className="mb-2">Import from File:</label>
                   <input
                     type="file"
                     id="import"
@@ -453,12 +634,34 @@ export default function Settings() {
                     onChange={importSettings}
                     className="border rounded p-2"
                   />
-                  {importStatus && (
-                    <div className="text-sm">
-                      {importStatus}
-                    </div>
-                  )}
                 </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="importUrl" className="mb-2">Import from URL:</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter settings URL..."
+                      className="flex-1 border rounded p-2"
+                      id="importUrl"
+                    />
+                    <button
+                      onClick={() => {
+                        const url = document.getElementById('importUrl').value;
+                        if (url) downloadSettingsFromURL(url);
+                      }}
+                      className="button-info px-4 py-2 rounded transition-colors"
+                    >
+                      Import
+                    </button>
+                  </div>
+                </div>
+
+                {importStatus && (
+                  <div className="text-sm">
+                    {importStatus}
+                  </div>
+                )}
               </div>
             </div>
           </div>
