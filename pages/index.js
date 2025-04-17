@@ -3,15 +3,17 @@ import { useState, useEffect, useRef } from 'react';
 import Navbar from './navbar'
 
 export default function Home() {
+  // application states
   const searchInputRef = useRef(null);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [recentSearches, setRecentSearches] = useState([]);
   const [searchInput, setSearchInput] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  // search settings
   const [searchEngine, setSearchEngine] = useState('');
   const [suggestionProvider, setSuggestionProvider] = useState('https://suggestqueries.google.com/complete/search?client=firefox&q=');
   const [maxSuggestions, setMaxSuggestions] = useState(5);
   const [maxRecentSearchesInSuggestions, setMaxRecentSearchesInSuggestions] = useState(5);
   const [suggestions, setSuggestions] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
   const [bookmarks, setBookmarks] = useState([
     {
       title: 'Canvas (WUSTL)',
@@ -65,10 +67,11 @@ export default function Home() {
 
   useEffect(() => {
     // Load recent searches and search engine from localStorage on component mount
-    const savedSearches = localStorage.getItem('recentSearches');
-    const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedBookmarks = localStorage.getItem('bookmarks');
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
+    // search settings
+    const savedSearches = localStorage.getItem('recentSearches');
+    const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedSuggestionProvider = localStorage.getItem('suggestionProvider');
     const savedMaxSuggestions = localStorage.getItem('maxSuggestions');
     const savedMaxRecentSearchesInSuggestions = localStorage.getItem('maxRecentSearchesInSuggestions');
@@ -87,8 +90,8 @@ export default function Home() {
       setSuggestionProvider(savedSuggestionProvider);
     } else {
       // Default suggestion provider if none set
-      setSuggestionProvider('https://suggestqueries.google.com/complete/search?client=firefox&q=');
-      localStorage.setItem('suggestionProvider', 'https://suggestqueries.google.com/complete/search?client=firefox&q=');
+      setSuggestionProvider('https://suggestqueries.google.com/complete/search?client=firefox&q={searchTerms}');
+      localStorage.setItem('suggestionProvider', 'https://suggestqueries.google.com/complete/search?client=firefox&q={searchTerms}');
     }
     if (savedMaxSuggestions) {
       setMaxSuggestions(savedMaxSuggestions);
@@ -109,15 +112,30 @@ export default function Home() {
     }
     setBackgroundImage(savedBackgroundImage);
   }, []);
-
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchInput.trim().length > 0) {
         try {
           const response = await fetch(
-            `${suggestionProvider}${encodeURIComponent(searchInput)}`
+            `${suggestionProvider.replace('{searchTerms}', encodeURIComponent(searchInput))}`,
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
           );
-          const data = await response.json();
+          // Handle no response case
+          if (response.status === 0) {
+            throw new Error('No response received from suggestion provider');
+          }
+          const text = await response.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            console.error('Error parsing JSON:', e);
+            data = [[], []];
+          }
           // Filter and limit suggestions
           const filteredSuggestions = data[1] || [];
           const limitedSuggestions = filteredSuggestions.slice(0, maxSuggestions);
@@ -134,7 +152,7 @@ export default function Home() {
           const matchingRecentSearches = recentSearches
             .filter(search => search.toLowerCase().includes(searchInput.toLowerCase()))
             .slice(0, maxSuggestions);
-          setSuggestions([ ...matchingRecentSearches]);
+          setSuggestions(matchingRecentSearches);
         }
       } else {
         setSuggestions([]);
@@ -143,7 +161,7 @@ export default function Home() {
 
     const debounceTimer = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(debounceTimer);
-  }, [searchInput, recentSearches]);
+  }, [searchInput, recentSearches, suggestionProvider, maxSuggestions, maxRecentSearchesInSuggestions]);
 
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) return;
