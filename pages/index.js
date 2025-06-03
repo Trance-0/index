@@ -167,7 +167,7 @@ export default function Home() {
     if (!searchTerm.trim()) return;
 
     // Add new search to recent searches
-    const newSearches = [searchTerm, ...recentSearches.filter(s => s !== searchTerm)].slice(0, maxRecentSearches);
+    const newSearches = [searchTerm, ...recentSearches.filter(s => s !== searchTerm)].slice(0, maxRecentSearchesInSuggestions);
     setRecentSearches(newSearches);
     localStorage.setItem('recentSearches', JSON.stringify(newSearches));
 
