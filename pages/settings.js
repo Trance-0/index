@@ -670,7 +670,7 @@ export default function Settings() {
             <h2 className="text-xl font-semibold mb-4">About This Project</h2>
             <div className="space-y-4">
               <p>
-                This is a personal dashboard built with Next.js and Tailwind CSS. It provides a customizable homepage with all the variables stored by the user. Our goal is to return the rights of data to the user.
+                This is a personal dashboard built with Next.js and Tailwind CSS, developed with Cursor and use Maintainable AI generated code. It provides a customizable homepage with all the variables stored by the user. Our goal is to return the rights of data to the user.
               </p>
               <div className="mt-4">
                 <a

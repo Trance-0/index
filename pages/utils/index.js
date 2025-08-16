@@ -76,6 +76,13 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Workday2Calendar */}
+              <a href="/utils/workday2calendar" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Workday2Calendar</h2>
+                  <p>Convert your Workday schedule to a calendar format that can be imported into most calendar applications.</p>
+                </div>
+              </a>
             </div>
           </div>
         </div>
