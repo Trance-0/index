@@ -5,7 +5,6 @@ import * as XLSX from 'xlsx';
 import Navbar from '../navbar';
 import Footer from '../footer';
 import Image from 'next/image'
-import instructions from '../../public/instructions.jpg'
 
 export default function Workday2Calendar() {
   const [file, setFile] = useState(null);
@@ -317,7 +316,7 @@ export default function Workday2Calendar() {
                     <div>
                       <div className="mt-2">
                         <Image 
-                          src={instructions} 
+                          src="/Instructions.jpg" 
                           height={600}
                           width={800}
                           alt="Visual guide for exporting from Workday" 
