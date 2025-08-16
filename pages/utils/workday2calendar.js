@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import Navbar from '../navbar';
 import Footer from '../footer';
+import Image from 'next/image'
 
 export default function Workday2Calendar() {
   const [file, setFile] = useState(null);
@@ -314,8 +315,10 @@ export default function Workday2Calendar() {
                   <li className="flex items-start space-x-2">
                     <div>
                       <div className="mt-2">
-                        <img 
+                        <Image 
                           src="/instructions.jpg" 
+                          height={600}
+                          width={800}
                           alt="Visual guide for exporting from Workday" 
                           className="max-w-full h-auto border border-gray-300 dark:border-gray-600 rounded"
                         />
