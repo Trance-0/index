@@ -492,7 +492,7 @@ export default function Workday2Calendar() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Description</h2>
               <div className="text-gray-600 dark:text-gray-400 mb-4">
-                <p>This tool is designed to convert your Workday schedule to a calendar format that can be imported into most calendar applications. Please note that this tool is not affiliated with the University of Virginia and is provided for educational purposes only.</p>
+                <p>This tool is designed to convert your Workday schedule to a calendar format that can be imported into most calendar applications.</p>
                 <p>The tool is inspired by <a href="https://github.com/andr3wtn/workday2calendar" className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">Workday2Calendar Repo</a> and <a href="https://andr3wtn.github.io/workday2calendar/" className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">Workday2Calendar</a>. It is suffering to read pure html code and I use my own method to parse the excel file.</p>
               </div>
             </div>
