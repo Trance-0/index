@@ -186,8 +186,15 @@ export default function Workday2Calendar() {
     ics += 'METHOD:PUBLISH\r\n';
 
     courses.forEach((course, index) => {
+      // here we assume utc time
       const startDate = new Date(course['Start Date']);
       const endDate = new Date(course['End Date']);
+
+      console.log('Input startDate UTC',startDate.toUTCString());
+      console.log('Input endDate UTC',endDate.toUTCString());
+
+      const startTime = parseTime(course['Start Time']);
+      const endTime = parseTime(course['End Time']);
       
       // Parse days
       const dayMap = {
@@ -216,25 +223,26 @@ export default function Workday2Calendar() {
         days.push(dayMap[course['Days'].trim()]);
       }
 
-      // Parse time
-      const startTime = parseTime(course['Start Time']);
-      const endTime = parseTime(course['End Time']);
-      
       // Generate recurring events for each week
-      const eventStart = parseDate(firstDayOfClass,days[0]);
+      const eventStart = parseDate(startDate,days[0]);
 
-      eventStart.setHours(startTime.hours, startTime.minutes, 0, 0);
+      eventStart.setUTCHours(startTime.hours, startTime.minutes, 0, 0);
       
-      const eventEnd = parseDate(firstDayOfClass,days[0]);
-      eventEnd.setHours(endTime.hours, endTime.minutes, 0, 0);
+      const eventEnd = parseDate(startDate,days[0]);
+      eventEnd.setUTCHours(endTime.hours, endTime.minutes, 0, 0);
+
+      // debug script
+      console.log('extracted eventStart',eventStart);
+      console.log('extracted eventEnd',eventEnd);
+      console.log('days',days);
 
       ics += 'BEGIN:VEVENT\r\n';
       ics += `UID:${course['Course Code'].replace(/\s+/g, '')}-${index}@workday2calendar\r\n`;
       ics += `SUMMARY:${course['Course Code']} - ${course['Course Title']}\r\n`;
       ics += `DESCRIPTION:Instructor: ${course['Instructor']}\\nCredits: ${course['Credits']}\\nLocation: ${course['Location']}\r\n`;
       ics += `LOCATION:${course['Location']}\r\n`;
-      ics += `DTSTART:${formatDateForICS(eventStart)}\r\n`;
-      ics += `DTEND:${formatDateForICS(eventEnd)}\r\n`;
+      ics += `DTSTART;TZID=America/Chicago:${formatDateForICS(eventStart)}\r\n`;
+      ics += `DTEND;TZID=America/Chicago:${formatDateForICS(eventEnd)}\r\n`;
       ics += `RRULE:FREQ=WEEKLY;BYDAY=${days.join(',')};UNTIL=${formatDateForICS(endDate)}\r\n`;
       ics += 'END:VEVENT\r\n';
     });
@@ -246,7 +254,9 @@ export default function Workday2Calendar() {
   const parseDate = (dateStr, day) => {
     const date = new Date(dateStr);
     const dayIndex = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'].indexOf(day);
-    date.setDate(date.getDate() + dayIndex);
+
+    console.log('dayIndex and final date parsed',dayIndex,date.toUTCString());
+    date.setUTCDate(date.getUTCDate() + dayIndex);
     return date;
   };
 
@@ -261,8 +271,7 @@ export default function Workday2Calendar() {
   };
 
   const formatDateForICS = (date) => {
-    
-    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0];
   };
 
   const downloadICS = () => {
@@ -310,7 +319,7 @@ export default function Workday2Calendar() {
                   <li>Upload the downloaded file above</li>
                   <li>Set the semester dates, default date is filled for Fall 2025 in WUSTL</li>
                   <li>Click <strong>Parse Excel File</strong> to generate your class events and review them for accuracy</li>
-                  <li>Once you've confirmed the events, you can download the ICS file and import it to your calendar app
+                  <li>Once you've confirmed the events, you can download the ICS file and import it to your calendar app (Example: <a href="https://calendar.google.com/calendar/u/0/r/settings/export" className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">import ICS to Google Calendar</a>)
                   </li>
                   <li className="flex items-start space-x-2">
                     <div>
