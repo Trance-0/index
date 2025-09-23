@@ -97,8 +97,11 @@ export default function Navbar() {
           <a href="https://www.trance-0.com" className="transition duration-300">
             Blogs
           </a>
-          <a href="/status" className="transition duration-300">
+          <a href="https://status.trance-0.com" className="transition duration-300">
             Status
+          </a>
+          <a href="https://resume.trance-0.com" className="transition duration-300">
+            About Me
           </a>
           <a href="https://github.com/Trance-0/index" className="flex items-center transition duration-300">
             <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
