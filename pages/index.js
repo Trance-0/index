@@ -21,8 +21,8 @@ export default function Home() {
       description: 'Daily assignments'
     },
     {
-      title: 'WebStac (WUSTL)', 
-      url: 'https://webstac.wustl.edu/',
+      title: 'Workday (WUSTL)', 
+      url: 'https://www.myworkday.com/wustl/d/home.htmld',
       description: 'Task manager'
     },
     {
