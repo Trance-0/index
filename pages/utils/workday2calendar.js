@@ -13,8 +13,8 @@ export default function Workday2Calendar() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [parsingSteps, setParsingSteps] = useState([]);
-  const [firstDayOfClass, setFirstDayOfClass] = useState('2025-08-25');
-  const [lastDayOfClass, setLastDayOfClass] = useState('2025-12-07');
+  const [firstDayOfClass, setFirstDayOfClass] = useState('2026-01-12');
+  const [lastDayOfClass, setLastDayOfClass] = useState('2026-04-24');
   const fileInputRef = useRef(null);
   const logContainerRef = useRef(null);
 
