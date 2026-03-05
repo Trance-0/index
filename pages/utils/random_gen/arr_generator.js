@@ -10,9 +10,29 @@ export default function RandomArrayGenerator() {
     const [maxValue, setMaxValue] = useState(100);
     const [is2D, setIs2D] = useState(false);
     const [multiline, setMultiline] = useState(false);
+    const [unique, setUnique] = useState(false);
+    const [sorted, setSorted] = useState(false);
     const [generatedArray, setGeneratedArray] = useState([]);
 
     const generateRandomArray = () => {
+        let newArray;
+        let arrayLength = is2D ? rows * cols : rows;
+        if (unique) {
+            newArray = Array.from({ length: arrayLength }, () =>
+                Math.floor(Math.random() * (maxValue - minValue + 1) + minValue)
+            );
+        } else {
+            newArray = Array.from({ length: arrayLength }, () =>
+                Math.floor(Math.random() * (maxValue - minValue + 1) + minValue)
+            );
+        }
+        if (sorted) {
+            newArray.sort((a, b) => a - b);
+        }
+        format2DArray(newArray);
+    };
+
+    const format2DArray = (arr) => {
         if (is2D) {
             // Generate 2D array
             const newArray = (maxValue % 1 === 0) && (minValue % 1 === 0) ? Array.from({ length: rows }, () =>
@@ -133,6 +153,30 @@ export default function RandomArrayGenerator() {
                             />
                             <label htmlFor="multiline" className="text-sm font-medium">
                                 Multiline Output
+                            </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="unique"
+                                checked={unique}
+                                onChange={(e) => setUnique(e.target.checked)}
+                                className="rounded"
+                            />
+                            <label htmlFor="unique" className="text-sm font-medium">
+                                Unique Values
+                            </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="sorted"
+                                checked={sorted}
+                                onChange={(e) => setSorted(e.target.checked)}
+                                className="rounded"
+                            />
+                            <label htmlFor="sorted" className="text-sm font-medium">
+                                Sorted Array
                             </label>
                         </div>
                     </div>
