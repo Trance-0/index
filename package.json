@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "d3": "^7.9.0",
-    "hash-wasm": "^4.12.0",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.474.0",
     "next": "latest",

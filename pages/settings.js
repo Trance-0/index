@@ -7,22 +7,18 @@ import Footer from './footer'
 export default function Settings() {
   const { theme: currentTheme, setTheme } = useTheme();
   const [importStatus, setImportStatus] = useState('');
+  const [expandedBookmarkIndex, setExpandedBookmarkIndex] = useState(0);
   // bookmarks settings
   const [bookmarks, setBookmarks] = useState([]);
   // background settings
   const [backgroundImage, setBackgroundImage] = useState('');
+  const [autoDimBackground, setAutoDimBackground] = useState(true);
   // search settings
   const [searchEngine, setSearchEngine] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
   const [maxSuggestions, setMaxSuggestions] = useState(5);
   const [maxRecentSearchesInSuggestions, setMaxRecentSearchesInSuggestions] = useState(5);
   const [suggestionProvider, setSuggestionProvider] = useState('');
-  // Password Generator Settings
-  const [passwordLength, setPasswordLength] = useState(16);
-  const [passwordCharset, setPasswordCharset] = useState('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/');
-  const [passwordAlgorithm, setPasswordAlgorithm] = useState('blake3');
-  const [passwordSeed, setPasswordSeed] = useState('');
-  const [passwordEmail, setPasswordEmail] = useState('');
 
 
   const defaultBookmarks = [
@@ -32,9 +28,9 @@ export default function Settings() {
       description: 'Daily assignments'
     },
     {
-      title: 'WebStac (WUSTL)', 
-      url: 'https://webstac.wustl.edu/',
-      description: 'Task manager'
+      title: 'OpenAI',
+      url: 'https://openai.com/',
+      description: 'AI research and products'
     },
     {
       title: 'LeetCode',
@@ -74,27 +70,24 @@ export default function Settings() {
     const savedBookmarks = localStorage.getItem('bookmarks');
     // background settings
     const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
+    const savedAutoDimBackground = localStorage.getItem('autoDimBackground');
     // search settings
     const savedSearchEngine = localStorage.getItem('searchEngine');
     const savedRecentSearches = localStorage.getItem('recentSearches');
     const savedMaxSuggestions = localStorage.getItem('maxSuggestions');
     const savedMaxRecentSearchesInSuggestions = localStorage.getItem('maxRecentSearchesInSuggestions');
     const savedSuggestionProvider = localStorage.getItem('suggestionProvider');
-    // password generator settings
-    const savedPasswordLength = parseInt(localStorage.getItem('passwordLength')) || 16;
-    const savedPasswordCharset = localStorage.getItem('passwordCharset') || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    const savedPasswordAlgorithm = localStorage.getItem('passwordAlgorithm') || 'blake3';
-    const savedPasswordSeed = localStorage.getItem('passwordSeed') || '';
-    const savedPasswordEmail = localStorage.getItem('passwordEmail') || '';
     
     // bookmarks settings
     if (savedBookmarks) {
       setBookmarks(JSON.parse(savedBookmarks));
     } else {
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      setBookmarks(defaultBookmarks);
+      localStorage.setItem('bookmarks', JSON.stringify(defaultBookmarks));
     }
     // background settings
     setBackgroundImage(savedBackgroundImage);
+    setAutoDimBackground(savedAutoDimBackground !== 'false');
     // search settings
     if (savedSearchEngine) {
       setSearchEngine(savedSearchEngine);
@@ -123,12 +116,11 @@ export default function Settings() {
       setMaxSuggestions(5);
       localStorage.setItem('maxSuggestions', 5);
     }
-    // password generator settings
-    setPasswordLength(savedPasswordLength);
-    setPasswordCharset(savedPasswordCharset);
-    setPasswordAlgorithm(savedPasswordAlgorithm);
-    setPasswordSeed(savedPasswordSeed);
-    setPasswordEmail(savedPasswordEmail);
+    localStorage.removeItem('passwordLength');
+    localStorage.removeItem('passwordCharset');
+    localStorage.removeItem('passwordAlgorithm');
+    localStorage.removeItem('passwordSeed');
+    localStorage.removeItem('passwordEmail');
     
   }, []);
 
@@ -141,6 +133,14 @@ export default function Settings() {
     const newImage = e.target.value;
     setBackgroundImage(newImage);
     localStorage.setItem('backgroundImage', newImage);
+    window.dispatchEvent(new Event('index-settings-changed'));
+  };
+
+  const handleAutoDimBackgroundChange = (e) => {
+    const enabled = e.target.checked;
+    setAutoDimBackground(enabled);
+    localStorage.setItem('autoDimBackground', enabled);
+    window.dispatchEvent(new Event('index-settings-changed'));
   };
 
   const handleSearchEngineChange = (e) => {
@@ -167,36 +167,6 @@ export default function Settings() {
     localStorage.setItem('maxRecentSearchesInSuggestions', newMax);
   };
 
-  const handlePasswordLengthChange = (e) => {
-    const newLength = parseInt(e.target.value);
-    setPasswordLength(newLength);
-    localStorage.setItem('passwordLength', newLength);
-  };
-
-  const handlePasswordCharsetChange = (e) => {
-    const newCharset = e.target.value;
-    setPasswordCharset(newCharset);
-    localStorage.setItem('passwordCharset', newCharset);
-  };
-
-  const handlePasswordAlgorithmChange = (e) => {
-    const newAlgorithm = e.target.value;
-    setPasswordAlgorithm(newAlgorithm);
-    localStorage.setItem('passwordAlgorithm', newAlgorithm);
-  };
-
-  const handlePasswordSeedChange = (e) => {
-    const newSeed = e.target.value;
-    setPasswordSeed(newSeed);
-    localStorage.setItem('passwordSeed', newSeed);
-  };
-
-  const handlePasswordEmailChange = (e) => {
-    const newEmail = e.target.value;
-    setPasswordEmail(newEmail);
-    localStorage.setItem('passwordEmail', newEmail);
-  };
-
   const handleBookmarkChange = (index, field, value) => {
     const newBookmarks = [...bookmarks];
     newBookmarks[index][field] = value;
@@ -211,17 +181,31 @@ export default function Settings() {
       description: ''
     }];
     setBookmarks(newBookmarks);
+    setExpandedBookmarkIndex(newBookmarks.length - 1);
     localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
   };
 
   const removeBookmark = (index) => {
     const newBookmarks = bookmarks.filter((_, i) => i !== index);
     setBookmarks(newBookmarks);
+    setExpandedBookmarkIndex((currentIndex) => {
+      if (newBookmarks.length === 0) {
+        return -1;
+      }
+      if (currentIndex === index) {
+        return Math.max(0, index - 1);
+      }
+      if (currentIndex > index) {
+        return currentIndex - 1;
+      }
+      return currentIndex;
+    });
     localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
   };
 
   const restoreDefaultBookmarks = () => {
     setBookmarks(defaultBookmarks);
+    setExpandedBookmarkIndex(0);
     localStorage.setItem('bookmarks', JSON.stringify(defaultBookmarks));
   };
 
@@ -240,11 +224,7 @@ export default function Settings() {
       suggestionProvider: suggestionProvider,
       searchEngine: searchEngine,
       backgroundImage: backgroundImage,
-      passwordLength: passwordLength,
-      passwordCharset: passwordCharset,
-      passwordAlgorithm: passwordAlgorithm,
-      passwordSeed: passwordSeed,
-      passwordEmail: passwordEmail
+      autoDimBackground: autoDimBackground
     };
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -316,26 +296,11 @@ export default function Settings() {
             setBackgroundImage(settings.backgroundImage);
             localStorage.setItem('backgroundImage', settings.backgroundImage);
           }
-          if (settings.passwordLength) {
-            setPasswordLength(settings.passwordLength);
-            localStorage.setItem('passwordLength', settings.passwordLength);
+          if (typeof settings.autoDimBackground === 'boolean') {
+            setAutoDimBackground(settings.autoDimBackground);
+            localStorage.setItem('autoDimBackground', settings.autoDimBackground);
           }
-          if (settings.passwordCharset) {
-            setPasswordCharset(settings.passwordCharset);
-            localStorage.setItem('passwordCharset', settings.passwordCharset);
-          }
-          if (settings.passwordAlgorithm) {
-            setPasswordAlgorithm(settings.passwordAlgorithm);
-            localStorage.setItem('passwordAlgorithm', settings.passwordAlgorithm);
-          }
-          if (settings.passwordSeed) {
-            setPasswordSeed(settings.passwordSeed);
-            localStorage.setItem('passwordSeed', settings.passwordSeed);
-          }
-          if (settings.passwordEmail) {
-            setPasswordEmail(settings.passwordEmail);
-            localStorage.setItem('passwordEmail', settings.passwordEmail);
-          }
+          window.dispatchEvent(new Event('index-settings-changed'));
           setImportStatus('Settings imported successfully!');
           setTimeout(() => setImportStatus(''), 3000);
         } catch (error) {
@@ -396,40 +361,58 @@ export default function Settings() {
             <h2 className="text-xl font-semibold mb-4">Bookmark Settings</h2>
             <div className="space-y-4">
               {bookmarks.map((bookmark, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Bookmark {index + 1}</h3>
-                    <button
-                      onClick={() => removeBookmark(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
+                <details
+                  key={index}
+                  className="border rounded-lg overflow-hidden"
+                  open={expandedBookmarkIndex === index}
+                  onToggle={(e) => {
+                    if (e.currentTarget.open) {
+                      setExpandedBookmarkIndex(index);
+                    }
+                  }}
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 font-medium">
+                    <div className="min-w-0">
+                      <p className="truncate">Bookmark {index + 1}: {bookmark.title || 'Untitled bookmark'}</p>
+                      <p className="truncate text-sm opacity-70">{bookmark.url || 'No URL set'}</p>
+                    </div>
+                    <span className="text-sm opacity-70">Expand</span>
+                  </summary>
+                  <div className="border-t p-4">
+                    <div className="flex justify-end mb-3">
+                      <button
+                        onClick={() => removeBookmark(index)}
+                        className="text-red-500 hover:text-red-700"
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={bookmark.title}
+                        onChange={(e) => handleBookmarkChange(index, 'title', e.target.value)}
+                        placeholder="Title"
+                        className="w-full px-3 py-2 border rounded"
+                      />
+                      <input
+                        type="url"
+                        value={bookmark.url}
+                        onChange={(e) => handleBookmarkChange(index, 'url', e.target.value)}
+                        placeholder="URL"
+                        className="w-full px-3 py-2 border rounded"
+                      />
+                      <input
+                        type="text"
+                        value={bookmark.description}
+                        onChange={(e) => handleBookmarkChange(index, 'description', e.target.value)}
+                        placeholder="Description"
+                        className="w-full px-3 py-2 border rounded"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={bookmark.title}
-                      onChange={(e) => handleBookmarkChange(index, 'title', e.target.value)}
-                      placeholder="Title"
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                    <input
-                      type="url"
-                      value={bookmark.url}
-                      onChange={(e) => handleBookmarkChange(index, 'url', e.target.value)}
-                      placeholder="URL"
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                    <input
-                      type="text"
-                      value={bookmark.description}
-                      onChange={(e) => handleBookmarkChange(index, 'description', e.target.value)}
-                      placeholder="Description"
-                      className="w-full px-3 py-2 border rounded"
-                    />
-                  </div>
-                </div>
+                </details>
               ))}
               <button
                 onClick={addBookmark}
@@ -460,6 +443,17 @@ export default function Settings() {
               />
               <p className="text-sm mt-2">
                 Enter a URL for the background image of the index page, notice that the image must be accessible by the public. For example, you can use a URL from Unsplash or another image hosting service, personally I recommend using self hosted wordpress server. Images from X, or other social media platforms are usually not accessible by the public.
+              </p>
+              <label className="mt-4 flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={autoDimBackground}
+                  onChange={handleAutoDimBackgroundChange}
+                />
+                <span>Auto-dim bright backgrounds in dark mode</span>
+              </label>
+              <p className="text-sm mt-2">
+                When enabled, the app samples the selected background image and adds a dark overlay in dark mode if the image appears too bright.
               </p>
               {backgroundImage && (
                 <div className="mt-4">
@@ -544,72 +538,6 @@ export default function Settings() {
               >
                 Clear Search History
               </button>
-            </div>
-          </div>
-
-          <div className="rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Password Generator Settings</h2>
-            <div className="mb-6">
-              <label htmlFor="passwordLength" className="block mb-2">Password Length:</label>
-              <input
-                id="passwordLength"
-                type="number"
-                value={passwordLength}
-                onChange={handlePasswordLengthChange}
-                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
-                placeholder="Enter password length..."
-              />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="passwordCharset" className="block mb-2">Password Charset:</label>
-              <input
-                id="passwordCharset"
-                type="text"
-                value={passwordCharset}
-                onChange={handlePasswordCharsetChange}
-                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
-                placeholder="Enter password charset..."
-              />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="passwordAlgorithm" className="block mb-2">Password Algorithm:</label>
-              <select
-                id="passwordAlgorithm"
-                className="border rounded px-3 py-1"
-                value={passwordAlgorithm}
-                onChange={handlePasswordAlgorithmChange}
-              >
-                <option value="blake3">blake3</option>
-                <option value="blake2s">blake2s</option>
-                <option value="blake2b">blake2b</option>
-                <option value="sha256">sha256</option>
-                <option value="sha384">sha384</option>
-                <option value="sha512">sha512</option>
-                <option value="crc32">crc32</option>
-                <option value="crc64">crc64</option>
-              </select>
-            </div>
-            <div className="mb-6">
-              <label htmlFor="passwordSeed" className="block mb-2">Password Seed:</label>
-              <input
-                id="passwordSeed"
-                type="text"
-                value={passwordSeed}
-                onChange={handlePasswordSeedChange}
-                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
-                placeholder="Enter password seed..."
-              />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="passwordEmail" className="block mb-2">Password Email:</label>
-              <input
-                id="passwordEmail"
-                type="email"
-                value={passwordEmail}
-                onChange={handlePasswordEmailChange}
-                className="w-full px-5 py-2 rounded-lg border focus:outline-none shadow-sm text-sm"
-                placeholder="Enter email..."
-              />
             </div>
           </div>
 

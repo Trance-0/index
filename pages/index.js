@@ -21,9 +21,9 @@ export default function Home() {
       description: 'Daily assignments'
     },
     {
-      title: 'Workday (WUSTL)', 
-      url: 'https://www.myworkday.com/wustl/d/home.htmld',
-      description: 'Task manager'
+      title: 'OpenAI',
+      url: 'https://openai.com/',
+      description: 'AI research and products'
     },
     {
       title: 'LeetCode',
@@ -56,7 +56,6 @@ export default function Home() {
       description: 'Deployment & hosting platform'
     }
   ]);
-  const [backgroundImage, setBackgroundImage] = useState('');
 
   useEffect(() => {
     // Focus search input on component mount
@@ -68,7 +67,6 @@ export default function Home() {
   useEffect(() => {
     // Load recent searches and search engine from localStorage on component mount
     const savedBookmarks = localStorage.getItem('bookmarks');
-    const savedBackgroundImage = localStorage.getItem('backgroundImage') || '';
     // search settings
     const savedSearches = localStorage.getItem('recentSearches');
     const savedSearchEngine = localStorage.getItem('searchEngine');
@@ -110,52 +108,52 @@ export default function Home() {
     if (savedBookmarks) {
       setBookmarks(JSON.parse(savedBookmarks));
     }
-    setBackgroundImage(savedBackgroundImage);
   }, []);
   useEffect(() => {
+    const fallbackSuggestions = recentSearches
+      .filter(search => search.toLowerCase().includes(searchInput.toLowerCase()))
+      .slice(0, maxSuggestions);
+
     const fetchSuggestions = async () => {
-      if (searchInput.trim().length > 0) {
-        try {
-          const response = await fetch(
-            `${suggestionProvider.replace('{searchTerms}', encodeURIComponent(searchInput))}`,
-            {
-              headers: {
-                'Accept': 'application/json'
-              }
-            }
-          );
-          // Handle no response case
-          if (response.status === 0) {
-            throw new Error('No response received from suggestion provider');
-          }
-          const text = await response.text();
-          let data;
-          try {
-            data = JSON.parse(text);
-          } catch (e) {
-            console.error('Error parsing JSON:', e);
-            data = [[], []];
-          }
-          // Filter and limit suggestions
-          const filteredSuggestions = data[1] || [];
-          const limitedSuggestions = filteredSuggestions.slice(0, maxSuggestions);
-          
-          // Match with recent searches
-          const matchingRecentSearches = recentSearches
-            .filter(search => search.toLowerCase().includes(searchInput.toLowerCase()))
-            .slice(0, maxSuggestions - limitedSuggestions.length);
-          
-          setSuggestions([...limitedSuggestions, ...matchingRecentSearches]);
-        } catch (error) {
-          console.error('Error fetching suggestions:', error);
-          // Fallback to recent searches if API fails
-          const matchingRecentSearches = recentSearches
-            .filter(search => search.toLowerCase().includes(searchInput.toLowerCase()))
-            .slice(0, maxSuggestions);
-          setSuggestions(matchingRecentSearches);
-        }
-      } else {
+      const trimmedSearch = searchInput.trim();
+      if (trimmedSearch.length === 0) {
         setSuggestions([]);
+        return;
+      }
+
+      if (!suggestionProvider || !suggestionProvider.includes('{searchTerms}')) {
+        setSuggestions(fallbackSuggestions);
+        return;
+      }
+
+      try {
+        const suggestionUrl = suggestionProvider.replace('{searchTerms}', encodeURIComponent(trimmedSearch));
+        const response = await fetch(suggestionUrl, {
+          headers: {
+            Accept: 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Suggestion provider returned ${response.status}`);
+        }
+
+        const text = await response.text();
+        let data = [[], []];
+        try {
+          data = JSON.parse(text);
+        } catch {
+          setSuggestions(fallbackSuggestions);
+          return;
+        }
+
+        const filteredSuggestions = Array.isArray(data[1]) ? data[1] : [];
+        const limitedSuggestions = filteredSuggestions.slice(0, maxSuggestions);
+        const matchingRecentSearches = fallbackSuggestions.slice(0, maxSuggestions - limitedSuggestions.length);
+
+        setSuggestions([...limitedSuggestions, ...matchingRecentSearches]);
+      } catch {
+        setSuggestions(fallbackSuggestions);
       }
     };
 
@@ -200,10 +198,7 @@ export default function Home() {
 
       <Navbar />
       <main className="flex-grow flex flex-col">
-        <div
-          className="flex-grow bg-cover bg-center bg-no-repeat"
-          style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : {}}
-        >
+        <div className="flex-grow">
           <div className="flex flex-col items-center pt-20 px-4">
             {/* Google-style logo */}
             <h1 className="inv-title text-6xl font-bold mb-8">

@@ -3,8 +3,19 @@
 @tailwind utilities;
 
 @layer base{
+    html, body, #__next {
+        min-height: 100%;
+    }
     body {
-        @apply dark:bg-gray-800 bg-white
+        @apply dark:bg-gray-800 bg-white;
+    }
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        @apply dark:bg-black dark:bg-opacity-20 bg-white bg-opacity-10;
+        z-index: -1;
     }
     .bg-primary{
         @apply dark:bg-gray-800 dark:bg-opacity-90 bg-white bg-opacity-90
@@ -40,7 +51,7 @@
     }
     /*main background colors*/
     main {
-        @apply dark:bg-gray-500 bg-gray-200
+        @apply dark:bg-gray-500 dark:bg-opacity-40 bg-gray-200 bg-opacity-30
     }
     /*title colors*/
     .inv-title {
@@ -55,5 +66,30 @@
     }
     select {
         @apply dark:bg-gray-800 bg-gray-100
+    }
+    .app-shell {
+        position: relative;
+        min-height: 100vh;
+    }
+    .app-background {
+        position: fixed;
+        inset: 0;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        z-index: -3;
+    }
+    .app-background-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: -2;
+    }
+    .app-content {
+        position: relative;
+        min-height: 100vh;
+        z-index: 0;
     }
 }

@@ -36,14 +36,6 @@ export default function Utils() {
                 </div>
               </a>
 
-              {/* Password generator */}
-              <a href="/utils/pass_gen" className="h-full">
-                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
-                  <h2 className="text-xl font-semibold mb-4">Password generator</h2>
-                  <p>Generate a random password. (Testing, may not work as expected)</p>
-                </div>
-              </a>
-
               {/* Random generator */}
               <a href="/utils/random_gen" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
