@@ -52,6 +52,14 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Lofi camera */}
+              <a href="/utils/lofi_camera" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Lofi camera</h2>
+                  <p>Capture a camera frame and turn it into a blocky low-fi image you can save in one click.</p>
+                </div>
+              </a>
+
               {/* Division raster */}
               <a href="/utils/division_raster" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
