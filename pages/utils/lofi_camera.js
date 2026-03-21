@@ -127,6 +127,7 @@ export default function LofiCamera() {
   const sourceCanvasRef = useRef(null);
   const outputCanvasRef = useRef(null);
   const streamRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [cameraReady, setCameraReady] = useState(false);
   const [hasCachedSource, setHasCachedSource] = useState(false);
@@ -264,6 +265,11 @@ export default function LofiCamera() {
     image.src = cachedImage;
   };
 
+  const cacheAndOpenImage = (dataUrl) => {
+    localStorage.setItem(CACHE_KEY, dataUrl);
+    loadCachedImageToEditor(dataUrl);
+  };
+
   const captureFrame = () => {
     const video = videoRef.current;
     const sourceCanvas = sourceCanvasRef.current;
@@ -284,9 +290,36 @@ export default function LofiCamera() {
     sourceContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
     const cachedImage = sourceCanvas.toDataURL('image/png');
-    localStorage.setItem(CACHE_KEY, cachedImage);
-    loadCachedImageToEditor(cachedImage);
+    cacheAndOpenImage(cachedImage);
     stopCamera();
+  };
+
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        stopCamera();
+        cacheAndOpenImage(reader.result);
+      } else {
+        setError('Unable to read the selected image.');
+      }
+    };
+    reader.onerror = () => {
+      setError('Unable to read the selected image.');
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
   };
 
   const openEditorFromCache = () => {
@@ -345,31 +378,44 @@ export default function LofiCamera() {
                     playsInline
                     className="w-full rounded-lg border aspect-[3/4] md:aspect-video object-cover bg-black"
                   />
-                  <div className="flex flex-wrap gap-3">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <div className="grid grid-cols-4 gap-2">
                     <button
                       onClick={startCamera}
-                      className="button-info px-4 py-2 rounded transition-colors"
+                      className="button-info px-3 py-2 rounded transition-colors text-sm"
                       type="button"
                     >
-                      {cameraReady ? 'Restart Camera' : 'Start Camera'}
+                      Start
                     </button>
                     <button
                       onClick={captureFrame}
-                      className="button-success px-4 py-2 rounded transition-colors"
+                      className="button-success px-3 py-2 rounded transition-colors text-sm"
                       type="button"
                       disabled={!cameraReady}
                     >
                       Capture
                     </button>
-                    {hasCachedSource && (
-                      <button
-                        onClick={openEditorFromCache}
-                        className="button-warning px-4 py-2 rounded transition-colors"
-                        type="button"
-                      >
-                        Open Last Capture
-                      </button>
-                    )}
+                    <button
+                      onClick={handleUploadClick}
+                      className="px-3 py-2 rounded transition-colors text-sm bg-yellow-500 text-black hover:bg-yellow-400 dark:bg-yellow-600 dark:text-white dark:hover:bg-yellow-500"
+                      type="button"
+                    >
+                      Upload
+                    </button>
+                    <button
+                      onClick={openEditorFromCache}
+                      className="button-warning px-3 py-2 rounded transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      type="button"
+                      disabled={!hasCachedSource}
+                    >
+                      Last
+                    </button>
                   </div>
                   <p className="text-sm text-secondary">
                     After capture, the source image is cached in your browser so you can keep editing without re-taking the shot.
