@@ -76,6 +76,14 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Dice Visualizer */}
+              <a href="/utils/dice_visualizer" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Dice Visualizer</h2>
+                  <p>Dice probability visualizer for CoC and DnD expressions.</p>
+                </div>
+              </a>
+
               {/* Workday2Calendar */}
               <a href="/utils/workday2calendar" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
