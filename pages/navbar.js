@@ -93,6 +93,8 @@ export default function Navbar() {
           </a>
           <a href="https://notenextra.trance-0.com" className="transition duration-300">
             Notes
+          </a><a href="https://code.trance-0.com" className="transition duration-300">
+            Codebook
           </a>
           <a href="https://www.trance-0.com" className="transition duration-300">
             Blogs

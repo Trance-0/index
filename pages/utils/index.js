@@ -68,13 +68,6 @@ export default function Utils() {
                 </div>
               </a>
 
-              {/* Mathlib Explorer */}
-              <a href="/utils/mathlib_explorer" className="h-full">
-                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
-                  <h2 className="text-xl font-semibold mb-4">Mathlib Explorer</h2>
-                  <p>Explore mathlib using a graph.</p>
-                </div>
-              </a>
 
               {/* Dice Visualizer */}
               <a href="/utils/dice_visualizer" className="h-full">
@@ -89,6 +82,49 @@ export default function Utils() {
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
                   <h2 className="text-xl font-semibold mb-4">Workday2Calendar</h2>
                   <p>Convert your Workday schedule to a calendar format that can be imported into most calendar applications.</p>
+                </div>
+              </a>
+
+              {/* Sheaf Explorer */}
+              <a href="/utils/sheaf_explorer" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Sheaf Explorer</h2>
+                  <p>Explore sheaves interactively.</p>
+                </div>
+              </a>
+              
+              {/* 100% Accurate MBTI Test */}
+              <a href="/utils/mbti_test" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">100% Accurate Personality Test</h2>
+                  <p>Take the 100% accurate IMSB <s>MBTI</s> personality test.</p>
+                </div>
+              </a>
+
+              {/* Miku Tap */}
+              <a href="/utils/miku_tap" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Miku Tap</h2>
+                  <p>Interactive Miku Tap music experience.</p>
+                  <p className="text-xs mt-2 opacity-60">Source: <span className="underline">github.com/HFIProgramming/mikutap</span></p>
+                </div>
+              </a>
+
+              {/* Mathlib Explorer */}
+              <a href="/utils/mathlib_explorer" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Mathlib Explorer</h2>
+                  <p>Explore mathlib using a graph.</p>
+                  <p className="text-xs mt-2 opacity-60">Source: <span className="underline">github.com/ekibun/mathlibexplorer</span></p>
+                </div>
+              </a>
+
+              {/* Otto-hzys */}
+              <a href="/utils/otto_hzys" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4">Otto-hzys</h2>
+                  <p>Otto-hzys interactive experience.</p>
+                  <p className="text-xs mt-2 opacity-60">Source: <span className="underline">github.com/hua-zhi-wan/otto-hzys</span></p>
                 </div>
               </a>
             </div>
