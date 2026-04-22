@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import { useState, useEffect, useRef } from 'react';
 import Navbar from './navbar'
+import PenroseBackground from './penrose_background'
 
 export default function Home() {
   // application states
@@ -196,6 +197,11 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <PenroseBackground
+        thinColor="#fef9c3"
+        thickColor="#fde68a"
+        outlineColor="#a16207"
+      />
       <Navbar />
       <main className="flex-grow flex flex-col">
         <div className="flex-grow">

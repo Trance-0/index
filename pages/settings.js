@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import Navbar from './navbar' 
+import Navbar from './navbar'
 import Footer from './footer'
+import PenroseBackground from './penrose_background'
 
 export default function Settings() {
   const { theme: currentTheme, setTheme } = useTheme();
@@ -319,6 +320,11 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <PenroseBackground
+        thinColor="#fef9c3"
+        thickColor="#fde68a"
+        outlineColor="#a16207"
+      />
       <Navbar />
       
       <main className="flex-grow">
