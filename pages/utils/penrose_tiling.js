@@ -4,11 +4,29 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import Navbar from '../navbar';
 import Footer from '../footer';
-import { drawPenrose } from '../penrose_background';
+import { createPenroseTree, collectVisibleTriangles } from '../penrose_background';
+
+const APOTHEM = Math.cos(Math.PI / 10);
+const PHI = (1 + Math.sqrt(5)) / 2;
+const MIN_ZOOM = 0.3;
+const MAX_ZOOM = 100;
+const SEED_GROWTH = PHI * PHI;
+
+function ensureTreeCovers(treeRef, thetaOffset, mirrorShift, neededSeedR, createFn) {
+  const current = treeRef.current;
+  const seedChanged = !current
+    || current.thetaOffset !== thetaOffset
+    || current.mirrorShift !== mirrorShift;
+  let newR = seedChanged ? 1 : current.seedR;
+  if (!seedChanged && newR >= neededSeedR) return;
+  while (newR < neededSeedR) newR *= SEED_GROWTH;
+  treeRef.current = createFn(thetaOffset, mirrorShift, newR);
+}
 
 export default function PenroseTilingExplorer() {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
+  const treeRef = useRef(null);
   const dragRef = useRef({
     active: false,
     button: 0,
@@ -53,23 +71,76 @@ export default function PenroseTilingExplorer() {
     canvas.style.height = H + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const count = drawPenrose(ctx, W, H, {
-      divisions,
-      thetaOffset,
-      mirrorShift,
-      zoom,
-      panX,
-      panY,
-      rotation,
-      showOutline,
-      thinColor,
-      thickColor,
-      outlineColor,
-      bgColor,
-      outlineWidthPx: outlineWidth,
-      enlarge: 1.1,
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, W, H);
+
+    const halfDiag = Math.hypot(W, H) / 2;
+    const baseS = halfDiag / APOTHEM;
+    const s = baseS * zoom;
+
+    // Grow the seed decagon so it always fully covers the visible region
+    // plus the current pan offset. This is what removes the decagonal border.
+    const visRadius = halfDiag / s;
+    const panDist = Math.hypot(panX, panY) / s;
+    const neededSeedR = (visRadius + panDist) / APOTHEM * 1.05;
+    ensureTreeCovers(treeRef, thetaOffset, mirrorShift, neededSeedR, createPenroseTree);
+
+    // Depth = user's divisions, plus the offset needed to compensate for a
+    // grown seed so tile SIZE in tile-space stays 1/PHI^divisions regardless
+    // of seedR. Zoom does not influence depth.
+    const seedR = treeRef.current.seedR;
+    const seedOffset = Math.max(0, Math.ceil(Math.log(seedR) / Math.log(PHI)));
+    const maxDepth = divisions + seedOffset;
+
+    const tris = collectVisibleTriangles(treeRef.current, {
+      W, H, s,
+      panX, panY, rotation,
+      maxDepth,
+      minPixelSize: 1,
     });
-    setTriangleCount(count);
+
+    ctx.save();
+    ctx.translate(W / 2 + panX, H / 2 + panY);
+    ctx.rotate(rotation);
+    ctx.scale(s, s);
+
+    ctx.beginPath();
+    for (const t of tris) {
+      if (t.shape !== 'thin') continue;
+      ctx.moveTo(t.v1.re, t.v1.im);
+      ctx.lineTo(t.v2.re, t.v2.im);
+      ctx.lineTo(t.v3.re, t.v3.im);
+      ctx.closePath();
+    }
+    ctx.fillStyle = thinColor;
+    ctx.fill();
+
+    ctx.beginPath();
+    for (const t of tris) {
+      if (t.shape !== 'thicc') continue;
+      ctx.moveTo(t.v1.re, t.v1.im);
+      ctx.lineTo(t.v2.re, t.v2.im);
+      ctx.lineTo(t.v3.re, t.v3.im);
+      ctx.closePath();
+    }
+    ctx.fillStyle = thickColor;
+    ctx.fill();
+
+    if (showOutline) {
+      ctx.beginPath();
+      for (const t of tris) {
+        ctx.moveTo(t.v2.re, t.v2.im);
+        ctx.lineTo(t.v1.re, t.v1.im);
+        ctx.lineTo(t.v3.re, t.v3.im);
+      }
+      ctx.lineWidth = outlineWidth / s;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = outlineColor;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+    setTriangleCount(tris.length);
   }, [divisions, thetaOffset, mirrorShift, zoom, panX, panY, rotation,
       showOutline, thinColor, thickColor, outlineColor, bgColor, outlineWidth]);
 
@@ -86,7 +157,7 @@ export default function PenroseTilingExplorer() {
     const delta = -e.deltaY * 0.0015;
     setZoom((z) => {
       const next = z * Math.exp(delta);
-      return Math.max(0.1, Math.min(50, next));
+      return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, next));
     });
   };
 
