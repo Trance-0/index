@@ -137,6 +137,28 @@ export default function Utils() {
                 </div>
               </a>
 
+              {/* Penrose Tiling Explorer */}
+              <a href="/utils/penrose_tiling" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 flex-shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                    Penrose Tiling Explorer
+                  </h2>
+                  <p>Interactively generate and explore aperiodic Penrose (P3) tilings.</p>
+                </div>
+              </a>
+              
+              {/* Geometry of Music */}
+              <a href="/utils/geometry_of_music" className="h-full">
+                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 flex-shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.947a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" /></svg>
+                    Geometry of Music
+                  </h2>
+                  <p>Explore the geometry of music interactively.</p>
+                </div>
+              </a>
+
               {/* Miku Tap */}
               <a href="/utils/miku_tap" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
@@ -161,17 +183,6 @@ export default function Utils() {
                 </div>
               </a>
 
-              {/* Penrose Tiling Explorer */}
-              <a href="/utils/penrose_tiling" className="h-full">
-                <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 flex-shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
-                    Penrose Tiling Explorer
-                  </h2>
-                  <p>Interactively generate and explore aperiodic Penrose (P3) tilings.</p>
-                </div>
-              </a>
-
               {/* Otto-hzys */}
               <a href="/utils/otto_hzys" className="h-full">
                 <div className="rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-full">
@@ -183,6 +194,8 @@ export default function Utils() {
                   <p className="text-xs mt-2 opacity-60">Source: <span className="underline">github.com/hua-zhi-wan/otto-hzys</span></p>
                 </div>
               </a>
+
+              
             </div>
           </div>
         </div>
