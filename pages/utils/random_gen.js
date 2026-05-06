@@ -4,10 +4,12 @@ import { useState } from 'react';
 import Head from 'next/head';
 import Navbar from '../navbar';
 import Footer from '../footer';
-import ArrayGenerator from './random_gen/arr_generator';
-import GraphGenerator from './random_gen/graph_generator';
-import StringGenerator from './random_gen/string_generator';
-import PermutationGenerator from './random_gen/perm_generator';
+import {
+  StringGenerator,
+  ArrayGenerator,
+  GraphGenerator,
+  PermutationGenerator,
+} from '../../lib/random_gen';
 
 export default function RandomDataGenerator() {
   const [activeTab, setActiveTab] = useState('string');

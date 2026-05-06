@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { useState, useEffect, useRef } from 'react';
 import Navbar from './navbar'
-import PenroseBackground from './penrose_background'
+import { PenroseBackground } from '../lib/penrose'
 
 export default function Home() {
   // application states

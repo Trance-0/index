@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import Navbar from './navbar'
 import Footer from './footer'
-import PenroseBackground from './penrose_background'
+import { PenroseBackground } from '../lib/penrose'
 
 export default function Settings() {
   const { theme: currentTheme, setTheme } = useTheme();

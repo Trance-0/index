@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import Navbar from '../navbar';
 import Footer from '../footer';
-import { createPenroseTree, collectVisibleTriangles } from '../penrose_background';
+import { createPenroseTree, collectVisibleTriangles } from '../../lib/penrose';
 
 const APOTHEM = Math.cos(Math.PI / 10);
 const PHI = (1 + Math.sqrt(5)) / 2;
