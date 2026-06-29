@@ -18,6 +18,7 @@ import {
   NODE_DEFS,
   NODE_TYPE_ORDER,
   KERNEL_TEMPLATES,
+  buildKernelTemplate,
   PRESETS,
   PRESET_ORDER,
   DEFAULT_PADDING,
@@ -75,13 +76,14 @@ function ImageViewer({
     if (canvasRef.current && imageData) drawImageDataToCanvas(canvasRef.current, imageData);
   }, [imageData]);
 
-  // Map a mouse event to integer source-pixel coordinates.
-  const toPixel = useCallback((e) => {
+  // Map a client point {clientX, clientY} to integer source-pixel coordinates.
+  // Works for both mouse and touch events.
+  const toPixel = useCallback((pt) => {
     const canvas = canvasRef.current;
-    if (!canvas || !imageData) return null;
+    if (!canvas || !imageData || !pt) return null;
     const rect = canvas.getBoundingClientRect();
-    const u = (e.clientX - rect.left) / rect.width;
-    const v = (e.clientY - rect.top) / rect.height;
+    const u = (pt.clientX - rect.left) / rect.width;
+    const v = (pt.clientY - rect.top) / rect.height;
     const cu = Math.max(0, Math.min(1, u));
     const cv = Math.max(0, Math.min(1, v));
     return {
@@ -91,19 +93,24 @@ function ImageViewer({
     };
   }, [imageData]);
 
+  // Pull a {clientX, clientY} from a mouse or touch event.
+  const pointOf = (e) => (e.touches && e.touches[0]) ? e.touches[0] : e;
+
   const handleMove = (e) => {
-    const p = toPixel(e);
+    const p = toPixel(pointOf(e));
     if (!p) return;
     if (drawMode && drag) {
+      // The canvas sets touch-action:none in draw mode, so the page won't
+      // scroll while the rectangle is being dragged out.
       setDrag((d) => ({ ...d, x1: p.x, y1: p.y }));
     } else if (!drawMode && onHover) {
-      onHover({ u: p.u, v: p.v, clientX: e.clientX, clientY: e.clientY });
+      onHover({ u: p.u, v: p.v, clientX: pointOf(e).clientX, clientY: pointOf(e).clientY });
     }
   };
 
   const handleDown = (e) => {
     if (!drawMode) return;
-    const p = toPixel(e);
+    const p = toPixel(pointOf(e));
     if (!p) return;
     setDrag({ x0: p.x, y0: p.y, x1: p.x, y1: p.y });
   };
@@ -149,8 +156,17 @@ function ImageViewer({
               onMouseLeave={() => { if (onLeave) onLeave(); }}
               onMouseDown={handleDown}
               onMouseUp={handleUp}
+              onTouchStart={handleDown}
+              onTouchMove={handleMove}
+              onTouchEnd={handleUp}
               className="block w-full h-auto"
-              style={{ imageRendering: 'pixelated', cursor: drawMode ? 'crosshair' : 'zoom-in' }}
+              style={{
+                imageRendering: 'pixelated',
+                cursor: drawMode ? 'crosshair' : 'zoom-in',
+                // Disable browser touch gestures over the canvas while drawing
+                // masks so a drag draws a rectangle instead of scrolling.
+                touchAction: drawMode ? 'none' : 'auto',
+              }}
             />
             {/* Persisted mask rectangles (faint) */}
             {(maskRects || []).map((r, i) => (
@@ -184,13 +200,19 @@ function ImageViewer({
 // ---------------------------------------------------------------------------
 //
 // Given offscreen canvases for the input and output images and a normalized
-// coordinate (u, v), it draws the SAME coordinate region in both, magnified
-// with nearest-neighbor sampling so individual pixels are visible.
+// coordinate (u, v), it draws the SAME content region in both, magnified with
+// nearest-neighbor sampling so individual pixels are visible.
+//
+// IMPORTANT: the sampled window is RELATIVE (a fraction of each image's size),
+// not a fixed pixel count. `fracX`/`fracY` are computed once from the input
+// image, so both lenses cover the identical region of the picture even after an
+// Upscale node has made the output several times larger. (A fixed pixel window
+// would show a much smaller — zoomed-in — slice of the larger output image.)
 
-const LENS_SIZE = 132;       // on-screen lens canvas size (px)
-const LENS_SRC_PIXELS = 15;  // how many source pixels across the lens shows
+const LENS_SIZE = 132;          // on-screen lens canvas size (px)
+const LENS_REF_PIXELS = 15;     // window width in INPUT pixels -> sets the fraction
 
-function LensCanvas({ srcCanvas, u, v, label }) {
+function LensCanvas({ srcCanvas, u, v, fracX, fracY, label }) {
   const ref = useRef(null);
   useEffect(() => {
     const c = ref.current;
@@ -204,23 +226,25 @@ function LensCanvas({ srcCanvas, u, v, label }) {
       return;
     }
     const sw = srcCanvas.width, sh = srcCanvas.height;
-    const half = LENS_SRC_PIXELS / 2;
-    let sx = Math.round(u * sw - half);
-    let sy = Math.round(v * sh - half);
-    sx = Math.max(0, Math.min(sw - LENS_SRC_PIXELS, sx));
-    sy = Math.max(0, Math.min(sh - LENS_SRC_PIXELS, sy));
+    // Window size in THIS image's pixels = fraction × this image's size, so the
+    // same content region is shown regardless of resolution.
+    const spanX = Math.max(1, fracX * sw);
+    const spanY = Math.max(1, fracY * sh);
+    let sx = u * sw - spanX / 2;
+    let sy = v * sh - spanY / 2;
+    sx = Math.max(0, Math.min(sw - spanX, sx));
+    sy = Math.max(0, Math.min(sh - spanY, sy));
     // White backdrop so transparent areas read as paper.
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, LENS_SIZE, LENS_SIZE);
-    ctx.drawImage(srcCanvas, sx, sy, LENS_SRC_PIXELS, LENS_SRC_PIXELS, 0, 0, LENS_SIZE, LENS_SIZE);
-    // Center crosshair marking the exact hovered pixel.
-    const cell = LENS_SIZE / LENS_SRC_PIXELS;
+    ctx.drawImage(srcCanvas, sx, sy, spanX, spanY, 0, 0, LENS_SIZE, LENS_SIZE);
+    // Outline the exact hovered source pixel.
+    const cellW = LENS_SIZE / spanX, cellH = LENS_SIZE / spanY;
+    const px = Math.floor(u * sw), py = Math.floor(v * sh);
     ctx.strokeStyle = 'rgba(255,0,128,0.9)';
     ctx.lineWidth = 1;
-    const cx = Math.round((u * sw - sx) * cell);
-    const cy = Math.round((v * sh - sy) * cell);
-    ctx.strokeRect(cx, cy, cell, cell);
-  }, [srcCanvas, u, v]);
+    ctx.strokeRect((px - sx) * cellW, (py - sy) * cellH, cellW, cellH);
+  }, [srcCanvas, u, v, fracX, fracY]);
   return (
     <div className="flex flex-col items-center">
       <canvas ref={ref} width={LENS_SIZE} height={LENS_SIZE} className="border rounded" style={{ imageRendering: 'pixelated' }} />
@@ -230,17 +254,31 @@ function LensCanvas({ srcCanvas, u, v, label }) {
 }
 
 // ---------------------------------------------------------------------------
-// Convolution kernel editor
+// Convolution kernel editor (QR-drawer style)
 // ---------------------------------------------------------------------------
 //
-// Checkerboard grid of editable weights. Click a cell to type a value, hover a
-// cell and use the mouse wheel to nudge it. A side panel reflects the currently
-// hovered cell. Templates can be loaded then refined.
+// The kernel is rendered like the QR module drawer in this project: a grid of
+// coloured cells. Each cell's WEIGHT is mapped through a monochrome colormap —
+// the kernel's lowest weight is black, its highest is white — so the kernel's
+// "shape" is visible at a glance. The user picks a brush value (the numeric
+// "colour" to paint) and clicks / drags cells to stamp it. Cell numbers are
+// hidden unless "view values" is checked; when shown, the text is black on
+// light cells and white on dark cells so it always stays readable. Hover + the
+// mouse wheel still nudges a single cell for fine tuning.
+
+// Format a weight for compact display (drops trailing zeros).
+function fmtWeight(v) {
+  const n = Number(v) || 0;
+  return String(Math.round(n * 100) / 100);
+}
 
 function KernelEditor({ config, onChange }) {
   const { width, height, weights } = config;
   const [hover, setHover] = useState(null); // index
+  const [paintValue, setPaintValue] = useState(1);
+  const [viewValues, setViewValues] = useState(false);
   const hoverRef = useRef(null);
+  const paintingRef = useRef(false);
   const gridRef = useRef(null);
 
   // Native, non-passive wheel listener so we can preventDefault page scroll
@@ -261,11 +299,20 @@ function KernelEditor({ config, onChange }) {
     return () => el.removeEventListener('wheel', onWheel);
   }, [config, weights, onChange]);
 
+  // Painting stops as soon as the pointer is released anywhere.
+  useEffect(() => {
+    const stop = () => { paintingRef.current = false; };
+    window.addEventListener('mouseup', stop);
+    window.addEventListener('touchend', stop);
+    return () => { window.removeEventListener('mouseup', stop); window.removeEventListener('touchend', stop); };
+  }, []);
+
   const setHovered = (idx) => { setHover(idx); hoverRef.current = idx; };
 
-  const setCell = (idx, raw) => {
+  // Stamp the brush value onto a cell.
+  const paintCell = (idx) => {
     const next = weights.slice();
-    next[idx] = raw === '' || raw === '-' ? 0 : Number(raw);
+    next[idx] = Number(paintValue) || 0;
     onChange({ ...config, weights: next });
   };
 
@@ -282,13 +329,27 @@ function KernelEditor({ config, onChange }) {
     onChange({ ...config, width: nw, height: nh, weights: next });
   };
 
+  // Apply a template at the CURRENT kernel size — generic templates regenerate
+  // at width×height, fixed 3×3 stencils are centered into it. The user's
+  // width/height are preserved (never rewritten).
   const loadTemplate = (key) => {
-    if (!key || !KERNEL_TEMPLATES[key]) return;
-    const t = KERNEL_TEMPLATES[key].make();
-    onChange({ ...config, ...t });
+    if (!key) return;
+    const built = buildKernelTemplate(key, width, height);
+    if (!built) return; // doesn't fit (disabled in the dropdown anyway)
+    onChange({
+      ...config,
+      weights: built.weights,
+      normalize: built.normalize,
+      clamp: built.clamp,
+      abs: built.abs,
+    });
   };
 
   const sum = weights.reduce((a, b) => a + Number(b || 0), 0);
+  const min = weights.length ? Math.min(...weights.map(Number)) : 0;
+  const max = weights.length ? Math.max(...weights.map(Number)) : 0;
+  // Monochrome colormap: min weight -> 0 (black), max weight -> 255 (white).
+  const greyOf = (v) => (max <= min ? 128 : Math.round(((Number(v) - min) / (max - min)) * 255));
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
@@ -307,50 +368,74 @@ function KernelEditor({ config, onChange }) {
         </div>
         <div
           ref={gridRef}
-          className="inline-grid gap-0.5 p-1 rounded bg-black/5 dark:bg-white/5"
+          onMouseLeave={() => setHovered(null)}
+          className="inline-grid gap-0.5 p-1 rounded bg-black/5 dark:bg-white/5 select-none"
           style={{ gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))` }}
         >
           {weights.map((wv, idx) => {
-            const checker = (Math.floor(idx / width) + (idx % width)) % 2 === 0;
+            const g = greyOf(wv);
+            const textColor = g < 128 ? '#fff' : '#000';
             return (
-              <input
+              <div
                 key={idx}
-                value={wv}
-                onChange={(e) => setCell(idx, e.target.value)}
-                onMouseEnter={() => setHovered(idx)}
-                onMouseLeave={() => setHovered(null)}
-                className={`w-12 h-9 text-center text-xs rounded border ${checker ? 'bg-white/70 dark:bg-black/30' : 'bg-gray-200/70 dark:bg-gray-700/40'} ${hover === idx ? 'ring-2 ring-fuchsia-500' : ''}`}
-              />
+                title={`row ${Math.floor(idx / width)}, col ${idx % width} = ${fmtWeight(wv)}`}
+                onMouseDown={() => { paintingRef.current = true; paintCell(idx); }}
+                onMouseEnter={() => { setHovered(idx); if (paintingRef.current) paintCell(idx); }}
+                className={`w-10 h-10 flex items-center justify-center text-[10px] font-mono rounded cursor-pointer border border-black/10 dark:border-white/20 ${hover === idx ? 'ring-2 ring-fuchsia-500' : ''}`}
+                style={{ backgroundColor: `rgb(${g},${g},${g})`, color: textColor }}
+              >
+                {viewValues ? fmtWeight(wv) : ''}
+              </div>
             );
           })}
         </div>
-        <p className="text-[11px] text-secondary mt-1">Click a cell to type · hover + mouse wheel to nudge (Shift = 0.1)</p>
+        <p className="text-[11px] text-secondary mt-1">
+          Click / drag to paint the brush value · hover + mouse wheel to nudge (Shift = 0.1)
+        </p>
       </div>
 
-      <div className="md:w-48 text-xs space-y-2">
+      <div className="md:w-52 text-xs space-y-2">
         <div>
-          <label className="block mb-1 font-medium">Load template</label>
+          <label className="block mb-1 font-medium">Brush value (the “colour” to paint)</label>
+          <input type="number" step={0.1} value={paintValue}
+            onChange={(e) => setPaintValue(e.target.value === '' ? 0 : Number(e.target.value))}
+            className="w-full px-2 py-1 rounded border" />
+        </div>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={viewValues} onChange={(e) => setViewValues(e.target.checked)} />
+          View values on cells
+        </label>
+        <div>
+          <label className="block mb-1 font-medium">Load template (at {width}×{height})</label>
           <select onChange={(e) => { loadTemplate(e.target.value); e.target.value = ''; }}
             defaultValue="" className="w-full px-2 py-1 rounded border">
             <option value="" disabled>Choose…</option>
-            {Object.entries(KERNEL_TEMPLATES).map(([k, t]) => (
-              <option key={k} value={k}>{t.label}</option>
-            ))}
+            {Object.entries(KERNEL_TEMPLATES).map(([k, t]) => {
+              // Generic templates fit any size; fixed 3×3 stencils need ≥3×3.
+              const fits = t.generic || (width >= 3 && height >= 3);
+              return (
+                <option key={k} value={k} disabled={!fits}>
+                  {t.label}{t.generic ? '' : ' (3×3)'}{!fits ? ' — needs ≥3×3' : ''}
+                </option>
+              );
+            })}
           </select>
         </div>
-        <div className="rounded border p-2 bg-black/5 dark:bg-white/5">
-          <div className="font-medium mb-1">Hovered cell</div>
+        <div className="rounded border p-2 bg-black/5 dark:bg-white/5 space-y-1">
+          <div className="font-medium">Hovered cell</div>
           {hover == null ? (
             <div className="text-secondary">— none —</div>
           ) : (
             <div>
               <div>row {Math.floor(hover / width)}, col {hover % width}</div>
-              <div>weight: <span className="font-mono">{weights[hover]}</span></div>
+              <div>weight: <span className="font-mono">{fmtWeight(weights[hover])}</span></div>
             </div>
           )}
-          <div className="mt-1 pt-1 border-t border-black/10 dark:border-white/10">
-            sum of weights: <span className="font-mono">{Math.round(sum * 100) / 100}</span>
+          <div className="pt-1 border-t border-black/10 dark:border-white/10 flex items-center gap-2">
+            <span className="inline-block w-3 h-3 rounded-sm border" style={{ background: '#000' }} /> min {fmtWeight(min)}
+            <span className="inline-block w-3 h-3 rounded-sm border ml-2" style={{ background: '#fff' }} /> max {fmtWeight(max)}
           </div>
+          <div>sum of weights: <span className="font-mono">{Math.round(sum * 100) / 100}</span></div>
         </div>
       </div>
     </div>
@@ -414,11 +499,32 @@ function ModalShell({ title, onClose, children, wide }) {
 function AddNodeModal({ onPick, onClose }) {
   return (
     <ModalShell title="Add pipeline node" onClose={onClose}>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {NODE_TYPE_ORDER.map((t) => (
-          <button key={t} onClick={() => onPick(t)}
-            className="text-left px-3 py-2 rounded border hover:bg-white/40 dark:hover:bg-black/20 text-sm">
-            {NODE_DEFS[t].label}
+          <button key={t} onClick={() => onPick(t)} title={NODE_DEFS[t].description}
+            className="text-left px-3 py-2 rounded border hover:bg-white/40 dark:hover:bg-black/20">
+            <div className="text-sm font-medium">{NODE_DEFS[t].label}</div>
+            <div className="text-[11px] text-secondary mt-0.5">{NODE_DEFS[t].description}</div>
+          </button>
+        ))}
+      </div>
+    </ModalShell>
+  );
+}
+
+// Preset picker as its own modal window (replaces the old dropdown).
+function PresetModal({ onPick, onClose }) {
+  return (
+    <ModalShell title="Load preset pipeline" onClose={onClose}>
+      <p className="text-xs text-secondary mb-2">
+        Loads a ready-made pipeline you can then edit and refine. This replaces the current node list.
+      </p>
+      <div className="space-y-2">
+        {PRESET_ORDER.map((k) => (
+          <button key={k} onClick={() => onPick(k)}
+            className="block w-full text-left px-3 py-2 rounded border hover:bg-white/40 dark:hover:bg-black/20">
+            <div className="text-sm font-medium">{PRESETS[k].label}</div>
+            <div className="text-[11px] text-secondary mt-0.5">{PRESETS[k].description}</div>
           </button>
         ))}
       </div>
@@ -475,7 +581,10 @@ function ConfigModal({ node, onSave, onClose, onEditMask }) {
 // Pipeline node row (with native drag-to-reorder)
 // ---------------------------------------------------------------------------
 
-function NodeRow({ node, index, onToggle, onRemove, onEdit, onDragStart, onDragOver, onDrop, dragging }) {
+function NodeRow({
+  node, index, total, onToggle, onRemove, onEdit,
+  onDragStart, onDragOver, onDrop, dragging, onMoveUp, onMoveDown,
+}) {
   const def = NODE_DEFS[node.type];
   return (
     <div
@@ -486,9 +595,18 @@ function NodeRow({ node, index, onToggle, onRemove, onEdit, onDragStart, onDragO
       className={`rounded border p-2 bg-white/40 dark:bg-black/20 ${dragging ? 'opacity-50' : ''} ${node.enabled ? '' : 'opacity-60'}`}
     >
       <div className="flex items-center gap-2">
-        <span className="cursor-grab text-secondary select-none" title="Drag to reorder">⠿</span>
+        <span className="cursor-grab text-secondary select-none hidden sm:inline" title="Drag to reorder">⠿</span>
+        {/* Up/down buttons: the reliable reorder path on touch / mobile, where
+            native HTML5 drag-and-drop does not fire. */}
+        <div className="flex flex-col -my-1">
+          <button onClick={onMoveUp} disabled={index === 0}
+            className="text-[10px] leading-3 px-1 disabled:opacity-30" title="Move up">▲</button>
+          <button onClick={onMoveDown} disabled={index === total - 1}
+            className="text-[10px] leading-3 px-1 disabled:opacity-30" title="Move down">▼</button>
+        </div>
         <input type="checkbox" checked={node.enabled} onChange={onToggle} title="Enable / disable" />
-        <button onClick={onEdit} className="flex-1 text-left text-sm font-medium truncate hover:underline">
+        <button onClick={onEdit} title={def.description}
+          className="flex-1 text-left text-sm font-medium truncate hover:underline">
           {index + 1}. {def.label}
         </button>
         <StatusBadge status={node.status} />
@@ -523,6 +641,7 @@ export default function ConvolutionEditorPage() {
   const [statusLine, setStatusLine] = useState('Upload an image and run the pipeline.');
 
   const [addOpen, setAddOpen] = useState(false);
+  const [presetOpen, setPresetOpen] = useState(false);
   const [configNodeId, setConfigNodeId] = useState(null);
   const [maskEditId, setMaskEditId] = useState(null);
 
@@ -537,6 +656,14 @@ export default function ConvolutionEditorPage() {
 
   const configNode = nodes.find((n) => n.id === configNodeId) || null;
   const maskEditNode = nodes.find((n) => n.id === maskEditId) || null;
+
+  // Relative zoom-lens window: a fraction of the image, derived from the INPUT
+  // image so both lenses show the same content region even after upscaling.
+  const lensWindow = useMemo(() => {
+    const base = inputImage || outputImage;
+    if (!base) return { fracX: 0.1, fracY: 0.1 };
+    return { fracX: LENS_REF_PIXELS / base.width, fracY: LENS_REF_PIXELS / base.height };
+  }, [inputImage, outputImage]);
 
   // Keep offscreen lens canvases in sync with the displayed images.
   useEffect(() => {
@@ -608,7 +735,19 @@ export default function ConvolutionEditorPage() {
 
   const loadPreset = (key) => {
     setNodes(makePreset(key));
+    setPresetOpen(false);
     setStatusLine(`Loaded preset: ${PRESETS[key].label}. Edit nodes, then Run.`);
+  };
+
+  // Move a node by one slot (used by the row up/down buttons; touch-friendly).
+  const moveNode = (from, to) => {
+    if (to < 0 || to >= nodes.length) return;
+    setNodes((ns) => {
+      const next = ns.slice();
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
   };
 
   const resetPipeline = () => {
@@ -754,13 +893,7 @@ export default function ConvolutionEditorPage() {
               className="button-info px-3 py-1.5 rounded text-sm disabled:opacity-50">Download output</button>
 
             <span className="mx-1 h-5 w-px bg-black/20 dark:bg-white/20" />
-            <label className="text-sm flex items-center gap-1">Preset
-              <select defaultValue="" onChange={(e) => { if (e.target.value) { loadPreset(e.target.value); e.target.value = ''; } }}
-                className="px-2 py-1 rounded border text-sm">
-                <option value="" disabled>Load preset…</option>
-                {PRESET_ORDER.map((k) => <option key={k} value={k}>{PRESETS[k].label}</option>)}
-              </select>
-            </label>
+            <button onClick={() => setPresetOpen(true)} className="button-info px-3 py-1.5 rounded text-sm">Load preset</button>
           </div>
 
           {statusLine && <div className="mb-3 text-xs text-secondary">{statusLine}</div>}
@@ -835,6 +968,7 @@ export default function ConvolutionEditorPage() {
                     key={node.id}
                     node={node}
                     index={i}
+                    total={nodes.length}
                     dragging={dragIndex === i}
                     onToggle={() => toggleNode(node.id)}
                     onRemove={() => removeNode(node.id)}
@@ -842,6 +976,8 @@ export default function ConvolutionEditorPage() {
                     onDragStart={onDragStart}
                     onDragOver={onDragOver}
                     onDrop={onDrop}
+                    onMoveUp={() => moveNode(i, i - 1)}
+                    onMoveDown={() => moveNode(i, i + 1)}
                   />
                 ))}
               </div>
@@ -860,13 +996,16 @@ export default function ConvolutionEditorPage() {
           }}
         >
           <div className="flex gap-2">
-            <LensCanvas srcCanvas={inputCanvasRef.current} u={lens.u} v={lens.v} label="Input" />
-            <LensCanvas srcCanvas={outputCanvasRef.current} u={lens.u} v={lens.v} label="Output" />
+            <LensCanvas srcCanvas={inputCanvasRef.current} u={lens.u} v={lens.v}
+              fracX={lensWindow.fracX} fracY={lensWindow.fracY} label="Input" />
+            <LensCanvas srcCanvas={outputCanvasRef.current} u={lens.u} v={lens.v}
+              fracX={lensWindow.fracX} fracY={lensWindow.fracY} label="Output" />
           </div>
         </div>
       )}
 
       {addOpen && <AddNodeModal onPick={addNode} onClose={() => setAddOpen(false)} />}
+      {presetOpen && <PresetModal onPick={loadPreset} onClose={() => setPresetOpen(false)} />}
       {configNode && (
         <ConfigModal
           node={configNode}
